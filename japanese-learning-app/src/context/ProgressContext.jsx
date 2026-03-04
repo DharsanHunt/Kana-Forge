@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const ProgressContext = createContext();
 
-const STORAGE_KEY = 'nihongo-michi-progress';
+const STORAGE_KEY = 'kana-forge-progress';
 
 const defaultProgress = {
     completedLessons: [],
