@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Noto+Sans+JP:wght@400;500;700&amp;family=Shippori+Mincho:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e63746",
+                        "gold": "#C9A84C",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#11090a",
+                        "surface-dark": "#141414",
+                        "card-dark": "#1A1A1A"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "noto": ["Noto Sans JP", "sans-serif"],
+                        "mincho": ["Shippori Mincho", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .grammar-highlight { color: #C9A84C; font-weight: 700; }
+        .japanese-pattern { font-family: 'Noto Sans JP', sans-serif; font-size: 20px; }
+        .romanized-text { font-family: 'Shippori Mincho', serif; }
+        .sidebar-item-active { background-color: rgba(230, 55, 70, 0.1); border-right: 2px solid #e63746; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex flex-col min-h-screen">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between border-b border-white/10 bg-background-dark/95 backdrop-blur-md px-6 md:px-12 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-white text-xl">fort</span>
+</div>
+<h2 class="text-xl font-black tracking-tighter uppercase">Kana Forge</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">LESSONS</a>
+<a class="text-sm font-semibold text-primary" href="#">GRAMMAR</a>
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">PRACTICE</a>
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">COMMUNITY</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center bg-white/5 border border-white/10 rounded px-3 py-1.5 w-64">
+<span class="material-symbols-outlined text-slate-400 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-500" placeholder="Search structures..." type="text"/>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-primary/30 overflow-hidden bg-white/10">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="User profile avatar icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBephrf1o5rWjs0WHLZrKbaW80KPTPIcGIlGscrh5W0vrWXy8yn1wgFSBamvuOZBrsAh_QDjB_zVFWE9J1X45xgi0VtceaBdMZ962pOICmc-sFahpmqnNGWGSyPQiQr1FLryZYYay8S5D-vkpEKit80YxvF139nR0bUWEUikBA_PZYe7YvFi7Ta34ynVSV3AJzPxUykpDvW9dvGAV0XkR3s4q3IV6Dtw6EV6rIHhcWfBmMczMqzmdoybN9Fz9QoAmwraEC9pta-6nM"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- Sidebar -->
+<aside class="hidden lg:flex flex-col w-64 border-r border-white/5 p-6 gap-8 bg-background-dark/50">
+<div class="flex flex-col gap-2">
+<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3">Main Menu</p>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-all text-slate-400 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg sidebar-item-active text-primary" href="#">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+<span class="text-sm font-medium">Grammar Library</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-all text-slate-400 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]">translate</span>
+<span class="text-sm font-medium">Vocabulary</span>
+</a>
+</div>
+<div class="flex flex-col gap-2">
+<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3">Progress</p>
+<div class="px-3">
+<div class="flex justify-between text-[11px] mb-1">
+<span class="text-slate-400">Mastery</span>
+<span class="text-primary">42%</span>
+</div>
+<div class="h-1 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[42%]"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-background-dark px-6 md:px-12 py-10">
+<div class="max-w-4xl mx-auto">
+<header class="mb-12">
+<h1 class="text-5xl font-black mb-4 tracking-tight">Grammar Library</h1>
+<p class="text-slate-400 text-lg leading-relaxed max-w-2xl">Refine your sentence construction through our curated database of Japanese grammar patterns across all JLPT levels.</p>
+</header>
+<!-- Search and Filters -->
+<div class="flex flex-col gap-6 mb-12">
+<div class="relative">
+<input class="w-full bg-surface-dark border border-white/10 rounded-lg py-4 pl-12 pr-4 text-white focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-slate-600" placeholder="Search by pattern (e.g. ～ながら, ～ために) or JLPT level..." type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">search</span>
+</div>
+<div class="flex flex-wrap gap-3">
+<button class="px-6 py-2 bg-primary text-white text-sm font-bold rounded-full hover:brightness-110 transition-all">N5</button>
+<button class="px-6 py-2 bg-white/5 border border-white/10 text-slate-400 text-sm font-bold rounded-full hover:bg-white/10 transition-all">N4</button>
+<button class="px-6 py-2 bg-white/5 border border-white/10 text-slate-400 text-sm font-bold rounded-full hover:bg-white/10 transition-all">N3</button>
+<button class="px-6 py-2 bg-white/5 border border-white/10 text-slate-400 text-sm font-bold rounded-full hover:bg-white/10 transition-all">N2</button>
+<button class="px-6 py-2 bg-white/5 border border-white/10 text-slate-400 text-sm font-bold rounded-full hover:bg-white/10 transition-all">N1</button>
+<button class="px-6 py-2 bg-white/5 border border-white/10 text-slate-400 text-sm font-bold rounded-full hover:bg-white/10 transition-all ml-auto flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+                                Filter
+                            </button>
+</div>
+</div>
+<!-- Grammar Accordion List -->
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="bg-surface-dark border border-white/10 rounded-lg overflow-hidden transition-all hover:border-white/20">
+<div class="p-6 flex items-center justify-between cursor-pointer group">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3">
+<span class="japanese-pattern font-bold group-hover:text-primary transition-colors">～ている (te iru)</span>
+<span class="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded">N5</span>
+</div>
+<p class="text-sm text-slate-400 italic romanized-text">Ongoing action or state</p>
+</div>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-white transition-colors">expand_more</span>
+</div>
+</div>
+<!-- Item 2 (Expanded Example) -->
+<div class="bg-surface-dark border border-white/10 rounded-lg overflow-hidden">
+<div class="p-6 flex items-center justify-between bg-white/[0.02]">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3">
+<span class="japanese-pattern font-bold text-primary">～ながら (nagara)</span>
+<span class="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded">N4</span>
+</div>
+<p class="text-sm text-slate-400 italic romanized-text">While doing; as; at the same time</p>
+</div>
+<span class="material-symbols-outlined text-primary">expand_less</span>
+</div>
+<div class="p-8 space-y-8 border-t border-white/5">
+<div class="bg-card-dark border-l-4 border-primary p-6 rounded-r-lg">
+<h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Construction</h4>
+<p class="text-lg japanese-pattern">Verb-ますstem + <span class="text-primary font-bold">ながら</span></p>
+</div>
+<div class="space-y-6">
+<h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Example Sentences</h4>
+<div class="space-y-4">
+<div class="group border-b border-white/5 pb-4">
+<p class="japanese-pattern mb-2">音楽を<span class="grammar-highlight">聞きながら</span>、勉強します。</p>
+<p class="romanized-text text-slate-400 text-sm">Ongaku o kikinagara, benkyou shimasu.</p>
+<p class="text-slate-500 text-sm mt-1">I study while listening to music.</p>
+</div>
+<div class="group border-b border-white/5 pb-4">
+<p class="japanese-pattern mb-2">歩き<span class="grammar-highlight">ながら</span>電話をしないでください。</p>
+<p class="romanized-text text-slate-400 text-sm">Arukinagara denwa o shinaide kudasai.</p>
+<p class="text-slate-500 text-sm mt-1">Please don't talk on the phone while walking.</p>
+</div>
+</div>
+</div>
+<div class="bg-card-dark border-l-4 border-slate-700 p-6 rounded-r-lg">
+<h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Usage Notes</h4>
+<p class="text-sm text-slate-400 leading-relaxed">
+                                        Used when the same subject performs two actions simultaneously. The second action mentioned is usually the main focus or primary action.
+                                    </p>
+</div>
+<div class="flex justify-end gap-3 pt-4">
+<button class="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm">bookmark</span> SAVE TO LIST
+                                    </button>
+<button class="flex items-center gap-2 text-xs font-bold text-primary hover:brightness-125 transition-colors">
+<span class="material-symbols-outlined text-sm">play_circle</span> PRACTICE NOW
+                                    </button>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="bg-surface-dark border border-white/10 rounded-lg overflow-hidden transition-all hover:border-white/20">
+<div class="p-6 flex items-center justify-between cursor-pointer group">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3">
+<span class="japanese-pattern font-bold group-hover:text-primary transition-colors">～ために (tame ni)</span>
+<span class="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded">N4</span>
+</div>
+<p class="text-sm text-slate-400 italic romanized-text">For; in order to; for the sake of</p>
+</div>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-white transition-colors">expand_more</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="bg-surface-dark border border-white/10 rounded-lg overflow-hidden transition-all hover:border-white/20">
+<div class="p-6 flex items-center justify-between cursor-pointer group">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3">
+<span class="japanese-pattern font-bold group-hover:text-primary transition-colors">～ておく (te oku)</span>
+<span class="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded">N4</span>
+</div>
+<p class="text-sm text-slate-400 italic romanized-text">To do something in advance</p>
+</div>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-white transition-colors">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

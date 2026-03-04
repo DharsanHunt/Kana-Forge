@@ -2,44 +2,54 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
     return (
-        <footer className="bg-navy text-cream/70 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Brand */}
-                    <div>
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="text-2xl">🗾</span>
-                            <span className="font-jp font-bold text-cream text-xl">Kana Forge</span>
+        <footer className="bg-bg-dark py-20 px-6 lg:px-20 border-t border-neutral-warm/5 text-neutral-warm/40">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
+                <div className="max-w-xs">
+                    <div className="flex items-center gap-3 text-neutral-warm mb-6">
+                        <div className="bg-primary text-white size-8 flex items-center justify-center rounded-sm rotate-3">
+                            <span className="text-lg font-serif font-bold">鍛</span>
                         </div>
-                        <p className="text-sm text-cream/50 leading-relaxed">
-                            Your calm, focused path to learning Japanese. No pressure, no leaderboards — just genuine learning.
-                        </p>
+                        <span className="text-lg font-bold tracking-tighter">KANAFORGE</span>
                     </div>
-
-                    {/* Quick Links */}
-                    <div>
-                        <h3 className="font-semibold text-cream mb-3 text-sm uppercase tracking-wider">Learn</h3>
-                        <div className="space-y-2">
-                            <Link to="/lessons" className="block text-sm text-cream/50 hover:text-sakura transition-colors">Lessons</Link>
-                            <Link to="/writing" className="block text-sm text-cream/50 hover:text-sakura transition-colors">Writing Systems</Link>
-                            <Link to="/vocabulary" className="block text-sm text-cream/50 hover:text-sakura transition-colors">Vocabulary</Link>
-                            <Link to="/grammar" className="block text-sm text-cream/50 hover:text-sakura transition-colors">Grammar</Link>
-                            <Link to="/chat" className="block text-sm text-cream/50 hover:text-sakura transition-colors">AI Conversation</Link>
-                        </div>
-                    </div>
-
-                    {/* Inspiration */}
-                    <div>
-                        <h3 className="font-semibold text-cream mb-3 text-sm uppercase tracking-wider">Today&apos;s Thought</h3>
-                        <blockquote className="text-sm text-cream/50 italic leading-relaxed border-l-2 border-sakura/30 pl-3">
-                            &ldquo;千里の道も一歩から&rdquo;<br />
-                            <span className="text-cream/40 not-italic">A journey of a thousand miles begins with a single step.</span>
-                        </blockquote>
-                    </div>
+                    <p className="text-sm font-light leading-relaxed italic">
+                        &quot;The quiet study of language is the highest form of self-cultivation.&quot;
+                    </p>
                 </div>
 
-                <div className="border-t border-cream/10 mt-8 pt-6 text-center text-xs text-cream/30">
-                    Built with ❤️ for Japanese learners everywhere.
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
+                    <div>
+                        <h6 className="text-neutral-warm font-bold text-xs uppercase tracking-widest mb-6">Learning</h6>
+                        <ul className="space-y-4 text-sm">
+                            <li><Link className="hover:text-primary transition-colors" to="/lessons">Lessons</Link></li>
+                            <li><Link className="hover:text-primary transition-colors" to="/writing">Writing</Link></li>
+                            <li><Link className="hover:text-primary transition-colors" to="/grammar">Grammar</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h6 className="text-neutral-warm font-bold text-xs uppercase tracking-widest mb-6">Practice</h6>
+                        <ul className="space-y-4 text-sm">
+                            <li><Link className="hover:text-primary transition-colors" to="/vocabulary">Vocabulary</Link></li>
+                            <li><Link className="hover:text-primary transition-colors" to="/quiz">Quiz</Link></li>
+                            <li><Link className="hover:text-primary transition-colors" to="/chat">AI Chat</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h6 className="text-neutral-warm font-bold text-xs uppercase tracking-widest mb-6">Account</h6>
+                        <ul className="space-y-4 text-sm">
+                            <li><Link className="hover:text-primary transition-colors" to="/progress">Progress</Link></li>
+                            <li><Link className="hover:text-primary transition-colors" to="/login">Login</Link></li>
+                            <li><Link className="hover:text-primary transition-colors" to="/get-started">Get Started</Link></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-neutral-warm/5 flex flex-col md:flex-row justify-between text-xs">
+                <p>&copy; 2024 Kana Forge Academy. All rights reserved.</p>
+                <div className="flex gap-6 mt-4 md:mt-0">
+                    <span className="hover:text-primary transition-colors cursor-pointer">Twitter</span>
+                    <span className="hover:text-primary transition-colors cursor-pointer">Discord</span>
+                    <span className="hover:text-primary transition-colors cursor-pointer">Instagram</span>
                 </div>
             </div>
         </footer>

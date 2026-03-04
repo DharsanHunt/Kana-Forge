@@ -1,153 +1,155 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { lessons } from '../data/lessons';
 import { useProgress } from '../context/ProgressContext';
 
 export default function LessonDetailPage() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { progress, completeLesson } = useProgress();
     const lesson = lessons.find((l) => l.id === id);
 
     if (!lesson) {
         return (
-            <div className="fade-in max-w-3xl mx-auto px-4 py-20 text-center">
-                <div className="text-5xl mb-4">😵</div>
-                <h1 className="text-2xl font-bold text-navy mb-3">Lesson not found</h1>
-                <p className="text-navy/50 mb-6">The lesson you&apos;re looking for doesn&apos;t exist.</p>
-                <Link to="/lessons" className="text-accent hover:text-accent-light font-medium">← Back to lessons</Link>
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="text-5xl mb-4 font-serif text-neutral-warm/20">空</div>
+                    <p className="text-neutral-warm/40 mb-4">Lesson not found.</p>
+                    <Link to="/lessons" className="text-primary hover:underline">← Back to Lessons</Link>
+                </div>
             </div>
         );
     }
 
     const isCompleted = progress.completedLessons.includes(lesson.id);
+    const lessonIndex = lessons.findIndex((l) => l.id === id);
+    const prevLesson = lessonIndex > 0 ? lessons[lessonIndex - 1] : null;
+    const nextLesson = lessonIndex < lessons.length - 1 ? lessons[lessonIndex + 1] : null;
 
-    const handleComplete = () => {
-        completeLesson(lesson.id);
+    const levelColors = { N5: '#2ecc71', N4: '#3498db', N3: '#f1c40f', N2: '#e63746', N1: '#F0EDE6' };
+    const color = levelColors[lesson.level] || '#F0EDE6';
+
+    const renderContent = (text) => {
+        if (!text) return null;
+        return text.split('\n').map((line, i) => {
+            if (line.startsWith('**') && line.endsWith('**')) {
+                return <h3 key={i} className="text-xl font-bold text-neutral-warm mt-6 mb-3">{line.replace(/\*\*/g, '')}</h3>;
+            }
+            if (line.startsWith('- ')) {
+                return (
+                    <div key={i} className="flex gap-3 my-2">
+                        <span className="text-primary mt-1.5 text-xs">●</span>
+                        <span className="text-neutral-warm/70 leading-relaxed">{line.substring(2)}</span>
+                    </div>
+                );
+            }
+            if (line.trim() === '') return <div key={i} className="h-3"></div>;
+            return <p key={i} className="text-neutral-warm/70 leading-relaxed mb-2">{line}</p>;
+        });
     };
 
     return (
-        <div className="fade-in max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-navy/40 mb-8">
-                <Link to="/lessons" className="hover:text-navy transition-colors">Lessons</Link>
-                <span>/</span>
-                <span className="text-navy/60">{lesson.level}</span>
-                <span>/</span>
-                <span className="text-navy/60 truncate">{lesson.title}</span>
-            </div>
+        <div className="fade-in min-h-screen">
+            <div className="max-w-3xl mx-auto px-6 lg:px-8 py-12">
+                {/* Breadcrumb */}
+                <div className="text-xs text-neutral-warm/30 tracking-wider uppercase mb-8 flex items-center gap-2">
+                    <Link to="/lessons" className="hover:text-primary transition-colors">Japanese</Link>
+                    <span>/</span>
+                    <span className="text-neutral-warm/50">{lesson.category}</span>
+                    <span>/</span>
+                    <span className="text-neutral-warm/60">{lesson.title}</span>
+                </div>
 
-            {/* Header */}
-            <div className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                    <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${lesson.level === 'N5' ? 'bg-bamboo/15 text-bamboo' :
-                            lesson.level === 'N4' ? 'bg-blue-500/10 text-blue-700' :
-                                lesson.level === 'N3' ? 'bg-gold/20 text-amber-800' :
-                                    lesson.level === 'N2' ? 'bg-accent/10 text-accent' :
-                                        'bg-navy/10 text-navy'
-                        }`}>
-                        {lesson.level}
+                {/* Header */}
+                <div className="flex items-start justify-between mb-8">
+                    <span
+                        className="text-xs font-bold px-3 py-1 rounded"
+                        style={{ backgroundColor: `${color}15`, color, border: `1px solid ${color}30` }}
+                    >
+                        LEVEL {lesson.level}
                     </span>
-                    {isCompleted && (
-                        <span className="inline-flex items-center gap-1 bg-bamboo/15 text-bamboo text-xs font-semibold px-3 py-1.5 rounded-full">
-                            ✓ Completed
+                    {!isCompleted ? (
+                        <button
+                            onClick={() => completeLesson(lesson.id)}
+                            className="flex items-center gap-2 text-sm font-medium border border-success/30 text-success px-4 py-2 rounded hover:bg-success/10 transition-colors"
+                        >
+                            <span className="text-success">●</span> Mark Complete
+                        </button>
+                    ) : (
+                        <span className="flex items-center gap-2 text-sm font-medium text-success/60">
+                            <span>✓</span> Completed
                         </span>
                     )}
                 </div>
 
-                <h1 className="text-3xl md:text-4xl font-bold text-navy mb-3">{lesson.title}</h1>
-                <p className="text-navy/50 text-lg">{lesson.description}</p>
-            </div>
+                <h1 className="text-3xl md:text-4xl font-serif font-bold text-neutral-warm mb-4">{lesson.title}</h1>
+                <p className="text-neutral-warm/50 text-lg font-light mb-10">{lesson.description}</p>
 
-            {/* Content */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 card-shadow border border-navy/5 mb-8">
-                <div className="prose-custom text-navy/80 leading-relaxed whitespace-pre-line text-[15px]">
-                    {lesson.content.split('\n').map((line, i) => {
-                        const trimmed = line.trim();
-                        if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
-                            return <h3 key={i} className="text-lg font-bold text-navy mt-6 mb-2">{trimmed.replace(/\*\*/g, '')}</h3>;
-                        }
-                        if (trimmed.startsWith('**')) {
-                            const parts = trimmed.split('**');
-                            return (
-                                <p key={i} className="mb-1">
-                                    {parts.map((part, j) => j % 2 === 1 ? <strong key={j} className="text-navy font-semibold">{part}</strong> : part)}
-                                </p>
-                            );
-                        }
-                        if (trimmed.startsWith('•')) {
-                            const content = trimmed.slice(1).trim();
-                            const parts = content.split('**');
-                            return (
-                                <div key={i} className="flex gap-2 mb-1.5 pl-2">
-                                    <span className="text-accent shrink-0">•</span>
-                                    <span>
-                                        {parts.map((part, j) => j % 2 === 1 ? <strong key={j} className="text-navy font-semibold">{part}</strong> : part)}
-                                    </span>
+                {/* Content Card */}
+                <div className="bg-bg-card border border-neutral-warm/5 rounded-xl p-8 mb-8">
+                    {renderContent(lesson.content)}
+                </div>
+
+                {/* Examples */}
+                {lesson.examples && lesson.examples.length > 0 && (
+                    <div className="mb-8">
+                        <h3 className="text-primary text-xs font-bold tracking-widest uppercase mb-6">Practice Examples</h3>
+                        <div className="space-y-4">
+                            {lesson.examples.map((ex, i) => (
+                                <div key={i} className="border-l-4 border-l-primary/40 bg-bg-card p-5 rounded-r">
+                                    <div className="font-jp text-xl text-neutral-warm mb-1">{ex.japanese}</div>
+                                    <div className="text-primary/70 text-sm italic">{ex.romaji}</div>
+                                    <div className="text-neutral-warm/40 text-sm mt-1">{ex.english}</div>
                                 </div>
-                            );
-                        }
-                        if (trimmed === '') return <div key={i} className="h-3"></div>;
-                        return <p key={i} className="mb-2">{trimmed}</p>;
-                    })}
-                </div>
-            </div>
-
-            {/* Examples */}
-            {lesson.examples && lesson.examples.length > 0 && (
-                <div className="mb-8">
-                    <h2 className="text-xl font-bold text-navy mb-4">📋 Examples</h2>
-                    <div className="space-y-3">
-                        {lesson.examples.map((example, i) => (
-                            <div
-                                key={i}
-                                className="bg-white rounded-xl p-5 card-shadow border border-navy/5 fade-in-up"
-                                style={{ animationDelay: `${i * 80}ms` }}
-                            >
-                                <div className="font-jp text-xl text-navy font-medium mb-1">{example.japanese}</div>
-                                <div className="text-accent/70 text-sm font-medium mb-1">{example.romaji}</div>
-                                <div className="text-navy/50 text-sm">{example.english}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Cultural Note */}
-            {lesson.culturalNote && (
-                <div className="bg-sakura-light/30 border border-sakura/20 rounded-2xl p-6 mb-8">
-                    <h3 className="font-bold text-navy text-lg mb-2">🏯 Cultural Note</h3>
-                    <p className="text-navy/70 text-sm leading-relaxed">{lesson.culturalNote}</p>
-                </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex flex-wrap gap-4">
-                {!isCompleted ? (
-                    <button
-                        onClick={handleComplete}
-                        id="mark-complete-btn"
-                        className="inline-flex items-center gap-2 bg-bamboo text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-bamboo/20 hover:shadow-xl hover:bg-bamboo-light hover:-translate-y-0.5 transition-all duration-300"
-                    >
-                        ✓ Mark as Complete
-                    </button>
-                ) : (
-                    <div className="inline-flex items-center gap-2 bg-bamboo/10 text-bamboo px-6 py-3 rounded-xl font-semibold">
-                        ✓ Lesson completed
+                            ))}
+                        </div>
                     </div>
                 )}
 
-                <Link
-                    to="/quiz"
-                    className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-accent/20 hover:shadow-xl hover:bg-accent-light hover:-translate-y-0.5 transition-all duration-300"
-                >
-                    Practice This →
-                </Link>
+                {/* Cultural Note */}
+                {lesson.culturalNote && (
+                    <div className="border-l-4 border-l-[#f1c40f] bg-bg-card p-6 rounded-r mb-8">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-[#f1c40f]">ℹ</span>
+                            <h4 className="text-xs font-bold text-[#f1c40f] tracking-widest uppercase">Cultural Note</h4>
+                        </div>
+                        <p className="text-neutral-warm/60 italic text-sm leading-relaxed">{lesson.culturalNote}</p>
+                    </div>
+                )}
 
-                <Link
-                    to="/lessons"
-                    className="inline-flex items-center gap-2 bg-navy/5 text-navy/60 px-6 py-3 rounded-xl font-medium hover:bg-navy/10 transition-all"
-                >
-                    ← All Lessons
-                </Link>
+                {/* Seal Lesson */}
+                {!isCompleted && (
+                    <div className="text-center py-12">
+                        <button
+                            onClick={() => completeLesson(lesson.id)}
+                            className="group"
+                        >
+                            <div className="w-16 h-16 mx-auto bg-primary/10 border border-primary/30 rounded-lg flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+                                <span className="text-2xl font-serif text-primary">完</span>
+                            </div>
+                            <p className="text-xs text-neutral-warm/30 uppercase tracking-wider mb-1">Seal Lesson</p>
+                            <p className="text-sm font-medium text-neutral-warm/50">Lesson Complete?</p>
+                            <p className="text-xs text-neutral-warm/30 mt-1">Stamp the seal to record your progress in the forge.</p>
+                        </button>
+                    </div>
+                )}
+
+                {/* Navigation */}
+                <div className="flex items-center justify-between pt-8 border-t border-neutral-warm/5">
+                    {prevLesson ? (
+                        <Link to={`/lessons/${prevLesson.id}`} className="text-sm text-neutral-warm/40 hover:text-primary transition-colors flex items-center gap-2">
+                            ← Previous
+                        </Link>
+                    ) : <div />}
+                    <div className="flex gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary"></span>
+                        <span className="w-2 h-2 rounded-full bg-neutral-warm/20"></span>
+                    </div>
+                    {nextLesson ? (
+                        <Link to={`/lessons/${nextLesson.id}`} className="text-sm text-primary font-medium hover:text-primary-light transition-colors flex items-center gap-2">
+                            Next Lesson →
+                        </Link>
+                    ) : <div />}
+                </div>
             </div>
         </div>
     );
