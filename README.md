@@ -1,4 +1,4 @@
-# 日本語道 — Nihongo Michi
+# Kana Forge — かなフォージ
 
 A calm, focused Japanese learning platform built with React + Tailwind CSS and powered by Claude AI.
 
