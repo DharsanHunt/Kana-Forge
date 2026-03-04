@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ProgressProvider } from './context/ProgressContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import HomePage from './pages/HomePage';
 import LessonsPage from './pages/LessonsPage';
 import LessonDetailPage from './pages/LessonDetailPage';
@@ -11,12 +12,15 @@ import VocabularyPage from './pages/VocabularyPage';
 import GrammarPage from './pages/GrammarPage';
 import ChatPage from './pages/ChatPage';
 import ProgressPage from './pages/ProgressPage';
+import LoginPage from './pages/LoginPage';
+import GetStartedPage from './pages/GetStartedPage';
 
 export default function App() {
   return (
     <ProgressProvider>
       <Router>
-        <div className="min-h-screen flex flex-col bg-cream">
+        <ScrollToTop />
+        <div className="min-h-screen flex flex-col">
           <Navbar />
           <main className="flex-1">
             <Routes>
@@ -29,6 +33,8 @@ export default function App() {
               <Route path="/grammar" element={<GrammarPage />} />
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/progress" element={<ProgressPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/get-started" element={<GetStartedPage />} />
             </Routes>
           </main>
           <Footer />
