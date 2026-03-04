@@ -9,7 +9,7 @@ export default function Footer() {
                     <div>
                         <div className="flex items-center gap-2 mb-3">
                             <span className="text-2xl">🗾</span>
-                            <span className="font-jp font-bold text-cream text-xl">日本語道</span>
+                            <span className="font-jp font-bold text-cream text-xl">Kana Forge</span>
                         </div>
                         <p className="text-sm text-cream/50 leading-relaxed">
                             Your calm, focused path to learning Japanese. No pressure, no leaderboards — just genuine learning.

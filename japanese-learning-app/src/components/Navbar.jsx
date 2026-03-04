@@ -25,10 +25,10 @@ export default function Navbar() {
                         <span className="text-2xl">🗾</span>
                         <div className="flex flex-col leading-tight">
                             <span className="font-jp font-bold text-navy text-lg tracking-tight group-hover:text-accent transition-colors duration-300">
-                                日本語道
+                                Kana Forge
                             </span>
                             <span className="text-[10px] text-navy/50 font-medium tracking-wider uppercase">
-                                Nihongo Michi
+                                かなフォージ
                             </span>
                         </div>
                     </Link>
@@ -43,8 +43,8 @@ export default function Navbar() {
                                     key={link.to}
                                     to={link.to}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${isActive
-                                            ? 'bg-navy text-cream shadow-sm'
-                                            : 'text-navy/70 hover:text-navy hover:bg-navy/5'
+                                        ? 'bg-navy text-cream shadow-sm'
+                                        : 'text-navy/70 hover:text-navy hover:bg-navy/5'
                                         }`}
                                 >
                                     <span className="mr-1.5">{link.icon}</span>
@@ -85,8 +85,8 @@ export default function Navbar() {
                                     to={link.to}
                                     onClick={() => setMobileOpen(false)}
                                     className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
-                                            ? 'bg-navy text-cream'
-                                            : 'text-navy/70 hover:text-navy hover:bg-navy/5'
+                                        ? 'bg-navy text-cream'
+                                        : 'text-navy/70 hover:text-navy hover:bg-navy/5'
                                         }`}
                                 >
                                     <span className="mr-2">{link.icon}</span>

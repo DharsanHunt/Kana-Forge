@@ -40,7 +40,7 @@ export default function ChatPage() {
     const [chatStarted, setChatStarted] = useState(false);
     const [wordPopup, setWordPopup] = useState(null);
     const [apiKey, setApiKey] = useState(() => {
-        try { return localStorage.getItem('nihongo-api-key') || ''; } catch { return ''; }
+        try { return localStorage.getItem('kana-forge-api-key') || ''; } catch { return ''; }
     });
     const [showApiKeyInput, setShowApiKeyInput] = useState(false);
     const messagesEndRef = useRef(null);
@@ -52,7 +52,7 @@ export default function ChatPage() {
 
     const saveApiKey = (key) => {
         setApiKey(key);
-        try { localStorage.setItem('nihongo-api-key', key); } catch { }
+        try { localStorage.setItem('kana-forge-api-key', key); } catch { }
     };
 
     const startChat = () => {
@@ -206,8 +206,8 @@ export default function ChatPage() {
                                     key={topic.id}
                                     onClick={() => setSelectedTopic(topic.id)}
                                     className={`p-3 rounded-xl text-sm font-medium transition-all text-left ${selectedTopic === topic.id
-                                            ? 'bg-navy text-cream'
-                                            : 'bg-paper text-navy/60 hover:bg-navy/5'
+                                        ? 'bg-navy text-cream'
+                                        : 'bg-paper text-navy/60 hover:bg-navy/5'
                                         }`}
                                 >
                                     {topic.label}
@@ -225,8 +225,8 @@ export default function ChatPage() {
                                     key={mode.id}
                                     onClick={() => setSelectedMode(mode.id)}
                                     className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${selectedMode === mode.id
-                                            ? 'bg-navy text-cream'
-                                            : 'bg-paper text-navy/60 hover:bg-navy/5'
+                                        ? 'bg-navy text-cream'
+                                        : 'bg-paper text-navy/60 hover:bg-navy/5'
                                         }`}
                                 >
                                     {mode.label}
@@ -244,8 +244,8 @@ export default function ChatPage() {
                                     key={level}
                                     onClick={() => setSelectedLevel(level)}
                                     className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${selectedLevel === level
-                                            ? 'bg-navy text-cream'
-                                            : 'bg-paper text-navy/60 hover:bg-navy/5'
+                                        ? 'bg-navy text-cream'
+                                        : 'bg-paper text-navy/60 hover:bg-navy/5'
                                         }`}
                                 >
                                     {level}
@@ -300,8 +300,8 @@ export default function ChatPage() {
                         >
                             <div
                                 className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-5 py-4 text-sm leading-relaxed ${msg.role === 'user'
-                                        ? 'bg-navy text-cream rounded-br-md'
-                                        : 'bg-white card-shadow border border-navy/5 text-navy/80 rounded-bl-md'
+                                    ? 'bg-navy text-cream rounded-br-md'
+                                    : 'bg-white card-shadow border border-navy/5 text-navy/80 rounded-bl-md'
                                     }`}
                             >
                                 <div className="font-jp">{renderMessageContent(msg.content)}</div>
