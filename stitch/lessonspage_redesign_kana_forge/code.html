@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kana Forge - Lessons</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=Shippori+Mincho:wght@400;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e63746",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#141111",
+                        "card-dark": "#1a1616",
+                        "border-subtle": "rgba(255,255,255,0.06)",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mincho": ["Shippori Mincho", "serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .kanji-bg {
+            position: absolute;
+            right: -2rem;
+            top: -2rem;
+            font-size: 24rem;
+            line-height: 1;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+            font-family: 'Shippori Mincho', serif;
+        }
+        .hanko-stamp {
+            border: 2px solid #e63746;
+            color: #e63746;
+            padding: 2px 4px;
+            font-family: 'Shippori Mincho', serif;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(-12deg);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex flex-col min-h-screen w-full overflow-x-hidden">
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-border-subtle bg-background-dark/80 backdrop-blur-md px-6 md:px-20 py-4">
+<div class="flex items-center gap-4">
+<div class="text-primary">
+<span class="material-symbols-outlined text-3xl">token</span>
+</div>
+<h2 class="text-slate-100 text-xl font-bold font-mincho tracking-tight">Kana Forge</h2>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+<a class="hover:text-primary transition-colors" href="#">Path</a>
+<a class="text-slate-100" href="#">Lessons</a>
+<a class="hover:text-primary transition-colors" href="#">Dictionary</a>
+<a class="hover:text-primary transition-colors" href="#">Stats</a>
+</nav>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-400 hover:text-slate-100">
+<span class="material-symbols-outlined">search</span>
+</button>
+<div class="h-8 w-8 rounded-full border border-border-subtle bg-primary/10 overflow-hidden" data-alt="User avatar placeholder">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Portrait of a user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADCy09IQSz0ywqKxawhrNNvwYejbyyjAnT4vPcS0gN_EjgVttk-YezVrcLidKs5WaLDLWgy9GR4_yopB1gd0UBPBPz8E6u9bMYAIqVKiBKWjSq6xS5mQ30SHxtMLx6RZNVHAhSrzB240U50F2u2el_rnLE4dQ-p5yc7UYs2wI6fqN5oXguKDJ1kimaSn_Q4szS27ICJMhRh3KzDFbAlyeQv0kZW0jpmDeLSlHIBG_3BAfEFatDh-GkPHk2bMczfzu1ejj3cCZkfHk"/>
+</div>
+</div>
+</div>
+</header>
+<main class="relative flex-1 max-w-5xl mx-auto w-full px-6 py-12 md:py-20 overflow-hidden">
+<div class="kanji-bg text-slate-100">初</div>
+<div class="relative z-10 mb-12">
+<h1 class="text-6xl md:text-8xl font-mincho font-extrabold text-slate-100 mb-4 tracking-tighter">Lessons</h1>
+<p class="text-slate-400 text-lg max-w-xl">Hone your blade in the art of Kanji. Master the foundational elements of the Japanese language through curated study sets.</p>
+</div>
+<div class="relative z-10 flex flex-col gap-8">
+<div class="flex flex-wrap items-center gap-3">
+<button class="px-6 py-2 rounded-full bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20">All Levels</button>
+<button class="px-6 py-2 rounded-full border border-border-subtle hover:border-primary/50 text-slate-400 hover:text-slate-100 text-sm font-medium transition-all">N5</button>
+<button class="px-6 py-2 rounded-full border border-border-subtle hover:border-primary/50 text-slate-400 hover:text-slate-100 text-sm font-medium transition-all">N4</button>
+<button class="px-6 py-2 rounded-full border border-border-subtle hover:border-primary/50 text-slate-400 hover:text-slate-100 text-sm font-medium transition-all">N3</button>
+<button class="px-6 py-2 rounded-full border border-border-subtle hover:border-primary/50 text-slate-400 hover:text-slate-100 text-sm font-medium transition-all">N2</button>
+<button class="px-6 py-2 rounded-full border border-border-subtle hover:border-primary/50 text-slate-400 hover:text-slate-100 text-sm font-medium transition-all">N1</button>
+<div class="h-6 w-px bg-border-subtle mx-2"></div>
+<button class="px-6 py-2 rounded-full border border-border-subtle hover:border-primary/50 text-slate-400 hover:text-slate-100 text-sm font-medium transition-all">Radicals</button>
+<button class="px-6 py-2 rounded-full border border-border-subtle hover:border-primary/50 text-slate-400 hover:text-slate-100 text-sm font-medium transition-all">Vocabulary</button>
+</div>
+<div class="flex flex-col border-t border-border-subtle">
+<div class="group flex items-center justify-between p-6 border-b border-border-subtle hover:bg-white/[0.02] transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 h-12 flex items-center justify-center rounded bg-primary/10 text-primary font-mincho text-2xl">
+                                一
+                            </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-3 mb-1">
+<h3 class="text-slate-100 text-lg font-semibold tracking-wide">Foundational Radicals</h3>
+<span class="text-[10px] uppercase tracking-widest bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">N5</span>
+<div class="hanko-stamp text-xs ml-2">完</div>
+</div>
+<p class="text-slate-500 text-sm">Essential strokes and first 10 basic kanji structures.</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-slate-600 text-sm font-medium">100% Mastered</span>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-primary transition-all group-hover:translate-x-1">arrow_forward</span>
+</div>
+</div>
+<div class="group flex items-center justify-between p-6 border-b border-border-subtle hover:bg-white/[0.02] transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 h-12 flex items-center justify-center rounded bg-primary/10 text-primary font-mincho text-2xl">
+                                日
+                            </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-3 mb-1">
+<h3 class="text-slate-100 text-lg font-semibold tracking-wide">Nature &amp; Time</h3>
+<span class="text-[10px] uppercase tracking-widest bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">N5</span>
+</div>
+<p class="text-slate-500 text-sm">Kanji for days of the week, elements, and seasonal transitions.</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-slate-400 text-sm font-medium">8/12 Lessons</span>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-primary transition-all group-hover:translate-x-1">arrow_forward</span>
+</div>
+</div>
+<div class="group flex items-center justify-between p-6 border-b border-border-subtle hover:bg-white/[0.02] transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 h-12 flex items-center justify-center rounded bg-primary/10 text-primary font-mincho text-2xl">
+                                人
+                            </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-3 mb-1">
+<h3 class="text-slate-100 text-lg font-semibold tracking-wide">People &amp; Relations</h3>
+<span class="text-[10px] uppercase tracking-widest bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">N5</span>
+</div>
+<p class="text-slate-500 text-sm">Family members, professions, and relational particles.</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-slate-400 text-sm font-medium">Locked</span>
+<span class="material-symbols-outlined text-slate-700">lock</span>
+</div>
+</div>
+<div class="group flex items-center justify-between p-6 border-b border-border-subtle hover:bg-white/[0.02] transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 h-12 flex items-center justify-center rounded bg-primary/10 text-primary font-mincho text-2xl">
+                                行
+                            </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-3 mb-1">
+<h3 class="text-slate-100 text-lg font-semibold tracking-wide">Motion &amp; Actions</h3>
+<span class="text-[10px] uppercase tracking-widest bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20">N4</span>
+</div>
+<p class="text-slate-500 text-sm">Verbs of movement and daily activities in the city.</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-slate-400 text-sm font-medium">Locked</span>
+<span class="material-symbols-outlined text-slate-700">lock</span>
+</div>
+</div>
+<div class="group flex items-center justify-between p-6 border-b border-border-subtle hover:bg-white/[0.02] transition-colors cursor-pointer">
+<div class="flex items-center gap-6">
+<div class="w-12 h-12 flex items-center justify-center rounded bg-primary/10 text-primary font-mincho text-2xl">
+                                事
+                            </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-3 mb-1">
+<h3 class="text-slate-100 text-lg font-semibold tracking-wide">Work &amp; Affairs</h3>
+<span class="text-[10px] uppercase tracking-widest bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20">N4</span>
+</div>
+<p class="text-slate-500 text-sm">Abstract concepts related to business and social matters.</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-slate-400 text-sm font-medium">Locked</span>
+<span class="material-symbols-outlined text-slate-700">lock</span>
+</div>
+</div>
+</div>
+<div class="mt-8 flex justify-center">
+<button class="flex items-center gap-2 px-8 py-3 bg-primary/5 hover:bg-primary/10 border border-primary/20 text-primary text-sm font-bold uppercase tracking-widest transition-all">
+                        Load More Mastery Tracks
+                        <span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+</div>
+</main>
+<footer class="mt-20 border-t border-border-subtle bg-background-dark py-12 px-20">
+<div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">token</span>
+<span class="font-mincho text-slate-100 font-bold">Kana Forge</span>
+</div>
+<p class="text-slate-500 text-sm max-w-xs">Traditional craftsmanship meets modern linguistics. Master the forge of Japanese literacy.</p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-12">
+<div class="flex flex-col gap-3">
+<h4 class="text-slate-300 text-xs font-bold uppercase tracking-widest">Training</h4>
+<a class="text-slate-500 text-sm hover:text-primary transition-colors" href="#">Radicals</a>
+<a class="text-slate-500 text-sm hover:text-primary transition-colors" href="#">Kanji Sets</a>
+<a class="text-slate-500 text-sm hover:text-primary transition-colors" href="#">Speed Drill</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="text-slate-300 text-xs font-bold uppercase tracking-widest">Resources</h4>
+<a class="text-slate-500 text-sm hover:text-primary transition-colors" href="#">Dictionary</a>
+<a class="text-slate-500 text-sm hover:text-primary transition-colors" href="#">Stroke Order</a>
+<a class="text-slate-500 text-sm hover:text-primary transition-colors" href="#">API</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="text-slate-300 text-xs font-bold uppercase tracking-widest">Social</h4>
+<a class="text-slate-500 text-sm hover:text-primary transition-colors" href="#">Discord</a>
+<a class="text-slate-500 text-sm hover:text-primary transition-colors" href="#">Twitter</a>
+</div>
+</div>
+</div>
+<div class="max-w-5xl mx-auto mt-12 pt-8 border-t border-border-subtle flex justify-between items-center text-[10px] text-slate-600 uppercase tracking-widest">
+<span>© 2024 Kana Forge Lessons Redesign</span>
+<span>Designed for Mastery</span>
+</div>
+</footer>
+</div>
+</body></html>

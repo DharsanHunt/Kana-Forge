@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+JP:wght@400;700&amp;family=Shippori+Mincho:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e63746",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#0a0a0a",
+                        "card-bg": "#141414",
+                        "option-bg": "#1a1a1a",
+                        "success": "#4A7C59",
+                        "error": "#E63946",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans JP", "sans-serif"],
+                        "kanji": ["Noto Sans JP", "sans-serif"],
+                        "score": ["Shippori Mincho", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="fixed top-0 left-0 w-full h-0.5 bg-slate-800 z-50">
+<div class="h-full bg-primary" style="width: 65%;"></div>
+</div>
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between border-b border-white/5 px-6 py-4 bg-background-dark/50 backdrop-blur-md sticky top-0.5 z-40">
+<div class="flex items-center gap-3">
+<div class="text-primary">
+<span class="material-symbols-outlined text-3xl">fluid</span>
+</div>
+<h2 class="text-white text-xl font-bold tracking-tight">Kana Forge</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex flex-col items-end px-4 border-r border-white/10">
+<span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Session Time</span>
+<span class="text-sm font-mono text-white">12:45</span>
+</div>
+<button class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</header>
+<main class="flex-1 max-w-4xl mx-auto w-full px-6 py-12">
+<div class="flex justify-between items-end mb-8">
+<div>
+<span class="text-primary text-xs font-bold uppercase tracking-[0.2em]">Hiragana Mastery</span>
+<h1 class="text-3xl font-bold mt-1">Quiz Progress</h1>
+</div>
+<div class="text-right">
+<span class="text-slate-500 text-sm">Question</span>
+<div class="text-2xl font-bold text-white">13 <span class="text-slate-600 text-lg">/ 20</span></div>
+</div>
+</div>
+<div class="bg-card-bg border border-white/[0.06] rounded-xl overflow-hidden mb-8 shadow-2xl">
+<div class="p-12 flex flex-col items-center justify-center border-b border-white/[0.06] bg-gradient-to-b from-white/[0.02] to-transparent">
+<div class="text-[120px] font-kanji leading-none mb-6 text-white" style="font-size: 120px;">あ</div>
+<p class="text-slate-400 text-lg">Select the correct romaji for this character</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-8">
+<button class="group flex items-center justify-between p-5 bg-option-bg border border-white/[0.08] rounded-lg hover:border-primary/50 transition-all text-left">
+<span class="text-xl font-medium text-white">a</span>
+<span class="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center group-hover:border-primary/50">
+<span class="w-2 h-2 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
+</span>
+</button>
+<button class="flex items-center justify-between p-5 bg-success border border-success rounded-lg text-left shadow-[0_0_20px_rgba(74,124,89,0.2)]">
+<span class="text-xl font-bold text-white">o</span>
+<span class="material-symbols-outlined text-white">check_circle</span>
+</button>
+<button class="flex items-center justify-between p-5 bg-error border border-error rounded-lg text-left shadow-[0_0_20px_rgba(230,57,70,0.2)]">
+<span class="text-xl font-bold text-white">e</span>
+<span class="material-symbols-outlined text-white">cancel</span>
+</button>
+<button class="group flex items-center justify-between p-5 bg-option-bg border border-white/[0.08] rounded-lg hover:border-primary/50 transition-all text-left">
+<span class="text-xl font-medium text-white">u</span>
+<span class="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center"></span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+<div class="p-6 bg-card-bg border border-white/[0.06] border-l-4 border-l-success rounded-r-lg">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-success">task_alt</span>
+<span class="text-sm font-bold text-success uppercase tracking-wider">Correct Answer</span>
+</div>
+<p class="text-slate-300 leading-relaxed">Great job! 'あ' is the first character of the hiragana alphabet and is pronounced as 'a'.</p>
+</div>
+<div class="p-6 bg-card-bg border border-white/[0.06] border-l-4 border-l-error rounded-r-lg opacity-60">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-error">error</span>
+<span class="text-sm font-bold text-error uppercase tracking-wider">Common Mistake</span>
+</div>
+<p class="text-slate-300 leading-relaxed">'お' (o) is often confused with 'あ' due to the similar circular base stroke.</p>
+</div>
+</div>
+<div class="border-t border-white/5 pt-12 text-center">
+<span class="text-slate-500 uppercase tracking-widest text-xs font-bold block mb-4">Current Mastery Level</span>
+<div class="font-score text-7xl md:text-8xl text-white mb-8 tracking-tighter">84<span class="text-3xl text-primary font-display ml-2">%</span></div>
+<div class="flex flex-col md:flex-row items-center justify-center gap-4">
+<button class="w-full md:w-auto px-10 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                        Next Question
+                    </button>
+<button class="w-full md:w-auto px-10 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-lg transition-all">
+                        Review Deck
+                    </button>
+</div>
+</div>
+</main>
+<footer class="mt-auto py-8 px-6 border-t border-white/5 text-center">
+<div class="flex justify-center gap-6 mb-4">
+<a class="text-slate-500 hover:text-primary transition-colors text-xs font-bold uppercase tracking-widest" href="#">Guide</a>
+<a class="text-slate-500 hover:text-primary transition-colors text-xs font-bold uppercase tracking-widest" href="#">Stats</a>
+<a class="text-slate-500 hover:text-primary transition-colors text-xs font-bold uppercase tracking-widest" href="#">Profile</a>
+</div>
+<p class="text-slate-600 text-xs">© 2024 Kana Forge. Refine your stroke, master your mind.</p>
+</footer>
+</div>
+<div class="fixed bottom-6 right-6 hidden md:block">
+<div class="relative group">
+<div class="absolute -inset-0.5 bg-primary/20 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+<button class="relative bg-background-dark border border-white/10 p-4 rounded-full text-primary shadow-xl">
+<span class="material-symbols-outlined">auto_awesome</span>
+</button>
+</div>
+</div>
+</body></html>

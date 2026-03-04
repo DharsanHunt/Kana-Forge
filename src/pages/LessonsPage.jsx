@@ -1,153 +1,130 @@
-import { Link, useSearchParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { lessons } from '../data/lessons';
 import { useProgress } from '../context/ProgressContext';
 
 const levels = ['All', 'N5', 'N4', 'N3', 'N2', 'N1'];
 const categories = ['All', 'hiragana', 'grammar', 'vocab', 'kanji'];
 
-const categoryLabels = {
-    hiragana: 'Hiragana',
-    grammar: 'Grammar',
-    vocab: 'Vocabulary',
-    kanji: 'Kanji',
-};
-
-const categoryIcons = {
-    hiragana: '✍️',
-    grammar: '📖',
-    vocab: '📝',
-    kanji: '🈴',
-};
-
 const levelColors = {
-    N5: 'bg-bamboo/15 text-bamboo',
-    N4: 'bg-blue-500/10 text-blue-700',
-    N3: 'bg-gold/20 text-amber-800',
-    N2: 'bg-accent/10 text-accent',
-    N1: 'bg-navy/10 text-navy',
+    N5: '#2ecc71', N4: '#3498db', N3: '#f1c40f', N2: '#e63746', N1: '#F0EDE6',
+};
+
+const categoryKanji = {
+    hiragana: 'あ', grammar: '文', vocab: '語', kanji: '漢',
 };
 
 export default function LessonsPage() {
-    const [searchParams] = useSearchParams();
-    const initialLevel = searchParams.get('level') || 'All';
-    const [selectedLevel, setSelectedLevel] = useState(initialLevel);
+    const [selectedLevel, setSelectedLevel] = useState('All');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const { progress } = useProgress();
 
-    const filteredLessons = lessons.filter((lesson) => {
-        const matchLevel = selectedLevel === 'All' || lesson.level === selectedLevel;
-        const matchCategory = selectedCategory === 'All' || lesson.category === selectedCategory;
-        return matchLevel && matchCategory;
-    });
+    const filtered = useMemo(() => {
+        return lessons.filter((l) => {
+            const matchLevel = selectedLevel === 'All' || l.level === selectedLevel;
+            const matchCat = selectedCategory === 'All' || l.category === selectedCategory;
+            return matchLevel && matchCat;
+        });
+    }, [selectedLevel, selectedCategory]);
 
     return (
-        <div className="fade-in max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            {/* Header */}
-            <div className="mb-10">
-                <h1 className="text-3xl md:text-4xl font-bold text-navy mb-3">📚 Lessons</h1>
-                <p className="text-navy/50 text-lg">Structured learning paths organized by JLPT level and topic.</p>
-            </div>
+        <div className="fade-in min-h-screen">
+            <div className="max-w-5xl mx-auto px-6 lg:px-8 py-16">
+                {/* Header */}
+                <div className="mb-12 relative">
+                    <div className="absolute -top-8 right-0 opacity-[0.04] pointer-events-none select-none">
+                        <span className="text-[20vh] font-serif">初</span>
+                    </div>
+                    <h1 className="text-6xl md:text-8xl font-serif font-bold gold-gradient-text mb-4">Lessons</h1>
+                    <p className="text-neutral-warm/50 text-lg max-w-lg font-light">
+                        Hone your blade in the art of Japanese. Master the foundational elements through curated study sets.
+                    </p>
+                </div>
 
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                {/* Level Filter */}
-                <div className="flex flex-wrap gap-2">
-                    <span className="text-sm text-navy/40 font-medium self-center mr-2">Level:</span>
+                {/* Filters */}
+                <div className="flex flex-wrap items-center gap-3 mb-10">
                     {levels.map((level) => (
                         <button
                             key={level}
                             onClick={() => setSelectedLevel(level)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${selectedLevel === level
-                                    ? 'bg-navy text-cream'
-                                    : 'bg-navy/5 text-navy/60 hover:bg-navy/10'
+                            className={`px-5 py-2.5 text-sm font-medium rounded transition-all ${selectedLevel === level
+                                    ? 'bg-primary text-white'
+                                    : 'border border-neutral-warm/10 text-neutral-warm/50 hover:border-neutral-warm/30 hover:text-neutral-warm'
                                 }`}
                         >
-                            {level}
+                            {level === 'All' ? 'All Levels' : level}
                         </button>
                     ))}
-                </div>
-
-                {/* Category Filter */}
-                <div className="flex flex-wrap gap-2">
-                    <span className="text-sm text-navy/40 font-medium self-center mr-2">Topic:</span>
-                    {categories.map((cat) => (
+                    <div className="w-px h-6 bg-neutral-warm/10 mx-2"></div>
+                    {categories.filter(c => c !== 'All').map((cat) => (
                         <button
                             key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${selectedCategory === cat
-                                    ? 'bg-navy text-cream'
-                                    : 'bg-navy/5 text-navy/60 hover:bg-navy/10'
+                            onClick={() => setSelectedCategory(selectedCategory === cat ? 'All' : cat)}
+                            className={`px-4 py-2.5 text-sm font-medium rounded transition-all ${selectedCategory === cat
+                                    ? 'bg-neutral-warm/10 text-neutral-warm'
+                                    : 'border border-neutral-warm/10 text-neutral-warm/40 hover:border-neutral-warm/20'
                                 }`}
                         >
-                            {cat === 'All' ? 'All' : categoryLabels[cat]}
+                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
                         </button>
                     ))}
                 </div>
-            </div>
 
-            {/* Lesson Count */}
-            <div className="text-sm text-navy/40 mb-6">
-                Showing {filteredLessons.length} lesson{filteredLessons.length !== 1 ? 's' : ''}
-            </div>
+                {/* Lessons List */}
+                <div className="space-y-1">
+                    {filtered.length === 0 ? (
+                        <div className="text-center py-20">
+                            <div className="text-4xl mb-4 opacity-30">空</div>
+                            <p className="text-neutral-warm/30">No lessons match your filters.</p>
+                        </div>
+                    ) : (
+                        filtered.map((lesson) => {
+                            const isCompleted = progress.completedLessons.includes(lesson.id);
+                            const color = levelColors[lesson.level] || '#F0EDE6';
+                            const kanji = categoryKanji[lesson.category] || '学';
 
-            {/* Lesson Cards */}
-            {filteredLessons.length === 0 ? (
-                <div className="text-center py-20">
-                    <div className="text-5xl mb-4">📭</div>
-                    <p className="text-navy/40 text-lg">No lessons match your filters.</p>
-                    <button
-                        onClick={() => { setSelectedLevel('All'); setSelectedCategory('All'); }}
-                        className="mt-4 text-accent hover:text-accent-light font-medium transition-colors"
-                    >
-                        Clear filters
-                    </button>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {filteredLessons.map((lesson, i) => {
-                        const isCompleted = progress.completedLessons.includes(lesson.id);
-                        return (
-                            <Link
-                                key={lesson.id}
-                                to={`/lessons/${lesson.id}`}
-                                className="group bg-white rounded-2xl p-6 card-shadow hover:card-shadow-hover hover:-translate-y-1 transition-all duration-300 border border-navy/5 relative overflow-hidden fade-in-up"
-                                style={{ animationDelay: `${i * 50}ms` }}
-                            >
-                                {isCompleted && (
-                                    <div className="absolute top-4 right-4">
-                                        <span className="inline-flex items-center gap-1 bg-bamboo/15 text-bamboo text-xs font-semibold px-2.5 py-1 rounded-full">
-                                            ✓ Done
-                                        </span>
+                            return (
+                                <Link
+                                    key={lesson.id}
+                                    to={`/lessons/${lesson.id}`}
+                                    className="group flex items-center gap-6 py-5 px-6 border-b border-neutral-warm/5 hover:bg-neutral-warm/[0.02] transition-all"
+                                >
+                                    {/* Kanji icon */}
+                                    <div className="text-3xl font-serif text-primary/40 group-hover:text-primary/70 transition-colors w-12 text-center shrink-0">
+                                        {kanji}
                                     </div>
-                                )}
 
-                                <div className="flex items-center gap-2 mb-3">
-                                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${levelColors[lesson.level]}`}>
-                                        {lesson.level}
-                                    </span>
-                                    <span className="text-sm text-navy/40">
-                                        {categoryIcons[lesson.category]} {categoryLabels[lesson.category] || lesson.category}
-                                    </span>
-                                </div>
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-3 mb-1">
+                                            <h3 className="font-bold text-neutral-warm group-hover:text-neutral-warm transition-colors">{lesson.title}</h3>
+                                            <span
+                                                className="text-[10px] font-bold px-2 py-0.5 rounded border"
+                                                style={{ color, borderColor: `${color}40` }}
+                                            >
+                                                {lesson.level}
+                                            </span>
+                                            {isCompleted && (
+                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-success/10 text-success border border-success/20">完</span>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-neutral-warm/35 truncate">{lesson.description}</p>
+                                    </div>
 
-                                <h3 className="font-bold text-navy text-lg mb-2 group-hover:text-accent transition-colors pr-16">
-                                    {lesson.title}
-                                </h3>
-
-                                <p className="text-navy/50 text-sm leading-relaxed line-clamp-2">
-                                    {lesson.description}
-                                </p>
-
-                                <div className="mt-4 flex items-center text-accent/70 text-sm font-medium group-hover:text-accent transition-colors">
-                                    Start lesson
-                                    <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                </div>
-                            </Link>
-                        );
-                    })}
+                                    {/* Status */}
+                                    <div className="text-sm text-neutral-warm/30 shrink-0 flex items-center gap-2">
+                                        {isCompleted ? (
+                                            <span className="text-success">100% Mastered</span>
+                                        ) : (
+                                            <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                                        )}
+                                    </div>
+                                </Link>
+                            );
+                        })
+                    )}
                 </div>
-            )}
+            </div>
         </div>
     );
 }

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+JP:wght@400;700&amp;family=Shippori+Mincho:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e63746",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211112",
+                        "neutral-dark": "#141414",
+                        "input-dark": "#1A1A1A"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "jp": ["Noto Sans JP", "sans-serif"],
+                        "mincho": ["Shippori Mincho", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .kana-card:hover {
+            border-color: #e63746;
+            background-color: rgba(230, 55, 70, 0.05);
+        }
+        .kana-card.selected {
+            border-color: #e63746;
+            background-color: rgba(230, 55, 70, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-primary/20 px-6 lg:px-40 py-3 bg-background-light dark:bg-background-dark">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-6">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight">Kana Forge</h2>
+</div>
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium" href="#">Practice</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium" href="#">Dictionary</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium" href="#">Community</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4">
+<label class="hidden sm:flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded h-full bg-slate-200 dark:bg-primary/10">
+<div class="text-slate-500 dark:text-primary/60 flex items-center justify-center pl-4">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="w-full border-none bg-transparent focus:ring-0 text-sm placeholder:text-slate-500 dark:placeholder:text-primary/40 px-3" placeholder="Search characters..."/>
+</div>
+</label>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded h-10 w-10 bg-slate-200 dark:bg-primary/20 text-slate-700 dark:text-slate-100 hover:bg-primary/30">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBWiST0K2HudmnyJnE_Vs5NanAWpfRbR4p7ZtNSSjgG-rRXqjCDa-JE9u97vKKtcp0EJbzS3_Zyz4IJP5JgOeUvTOT-AHKddUoE_k6Ke3tELWzqLxm1B5aVAZcjxXTn17EoMzlXGPIeoO2Q6SIEmDSVOxQdDxgln_vyb4DpjDl6bIXRzhSfzK986L-GcLnaCzCIQxcdmRo9i6WhakCUJLBQzavJoG65YZ8drXOqNvJoXp0I6DaWyayOq4vWgUP50o6ZRQ53V3lP-0o");'></div>
+</div>
+</div>
+</header>
+<main class="flex flex-col flex-1 px-6 lg:px-40 py-8 gap-8">
+<div class="flex flex-col gap-2">
+<h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100">Writing Practice</h1>
+<p class="text-slate-500 dark:text-primary/60">Hone your stroke order and character recognition</p>
+</div>
+<div class="flex border-b border-slate-200 dark:border-primary/20 gap-0">
+<button class="flex-1 py-4 text-xl font-mincho border-b-4 border-primary text-primary">Hiragana</button>
+<button class="flex-1 py-4 text-xl font-mincho border-b-4 border-transparent text-slate-400 hover:text-slate-200">Katakana</button>
+<button class="flex-1 py-4 text-xl font-mincho border-b-4 border-transparent text-slate-400 hover:text-slate-200">Kanji</button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<div class="lg:col-span-8 flex flex-col gap-6">
+<div class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
+<!-- Character Cards -->
+<div class="kana-card selected aspect-square flex flex-col items-center justify-center border border-primary/30 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">あ</span>
+<span class="text-[10px] text-primary/60 uppercase">a</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">い</span>
+<span class="text-[10px] text-slate-600 uppercase">i</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">う</span>
+<span class="text-[10px] text-slate-600 uppercase">u</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">え</span>
+<span class="text-[10px] text-slate-600 uppercase">e</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">お</span>
+<span class="text-[10px] text-slate-600 uppercase">o</span>
+</div>
+<!-- More cards for visual fill -->
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">か</span>
+<span class="text-[10px] text-slate-600 uppercase">ka</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">き</span>
+<span class="text-[10px] text-slate-600 uppercase">ki</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">く</span>
+<span class="text-[10px] text-slate-600 uppercase">ku</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">け</span>
+<span class="text-[10px] text-slate-600 uppercase">ke</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">こ</span>
+<span class="text-[10px] text-slate-600 uppercase">ko</span>
+</div>
+<!-- Row 2 -->
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">さ</span>
+<span class="text-[10px] text-slate-600 uppercase">sa</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">し</span>
+<span class="text-[10px] text-slate-600 uppercase">shi</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">す</span>
+<span class="text-[10px] text-slate-600 uppercase">su</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">せ</span>
+<span class="text-[10px] text-slate-600 uppercase">se</span>
+</div>
+<div class="kana-card aspect-square flex flex-col items-center justify-center border border-slate-800 bg-neutral-dark rounded cursor-pointer transition-all">
+<span class="text-2xl font-jp text-slate-100">そ</span>
+<span class="text-[10px] text-slate-600 uppercase">so</span>
+</div>
+</div>
+<div class="flex flex-col gap-6 bg-neutral-dark p-8 rounded-xl border border-primary/10 items-center justify-center min-h-[400px]">
+<div class="flex flex-col items-center gap-8 w-full max-w-md">
+<div class="flex flex-col items-center gap-2">
+<span class="text-[120px] font-jp leading-none text-slate-100">あ</span>
+<p class="text-primary/60 text-sm font-medium tracking-widest uppercase">Writing Mode: Active</p>
+</div>
+<div class="w-full flex flex-col gap-4">
+<label class="text-xs text-slate-500 uppercase font-bold tracking-wider">Type Romaji to Verify</label>
+<input autofocus="" class="w-full h-16 bg-input-dark border border-slate-800 rounded-lg text-center text-3xl font-mincho focus:border-primary focus:ring-1 focus:ring-primary transition-all text-slate-100" placeholder="..." type="text"/>
+<div class="flex justify-between items-center px-2">
+<span class="text-xs text-slate-600">Stroke 1 of 3</span>
+<button class="text-primary text-xs font-bold hover:underline">Show Stroke Order</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-6">
+<div class="bg-neutral-dark p-8 rounded-xl border border-primary/10 flex flex-col gap-8 sticky top-8">
+<div class="flex flex-col items-center text-center gap-4">
+<div class="w-full flex justify-between">
+<button class="p-2 text-slate-500 hover:text-primary"><span class="material-symbols-outlined">volume_up</span></button>
+<button class="p-2 text-slate-500 hover:text-primary"><span class="material-symbols-outlined">star</span></button>
+</div>
+<div class="text-[96px] font-jp leading-none text-slate-100">あ</div>
+<div class="text-[28px] font-mincho text-primary">a</div>
+</div>
+<div class="flex flex-col gap-6">
+<div class="border-t border-slate-800 pt-6">
+<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Stroke Practice</h3>
+<div class="w-full aspect-square bg-input-dark rounded border border-slate-800 flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 grid grid-cols-2 grid-rows-2">
+<div class="border-r border-b border-white/5"></div>
+<div class="border-b border-white/5"></div>
+<div class="border-r border-white/5"></div>
+<div></div>
+</div>
+<div class="z-10 bg-slate-400/5 aspect-square w-full h-full flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-800 text-6xl opacity-20">edit</span>
+</div>
+</div>
+<div class="mt-4 flex gap-2">
+<button class="flex-1 bg-slate-800 text-slate-100 py-2 rounded text-sm font-bold hover:bg-slate-700">Clear</button>
+<button class="flex-1 bg-primary text-slate-100 py-2 rounded text-sm font-bold hover:bg-primary/80">Check</button>
+</div>
+</div>
+<div class="border-t border-slate-800 pt-6">
+<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Mnemonics</h3>
+<p class="text-sm text-slate-400 italic">"Looks like a broken antenna (A)."</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="mt-12 border-t border-primary/10 px-6 lg:px-40 py-10 bg-neutral-dark">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-2">
+<div class="size-5 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48">
+<path d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z"></path>
+</svg>
+</div>
+<span class="font-bold text-slate-400">Kana Forge</span>
+</div>
+<div class="flex gap-8 text-sm text-slate-500">
+<a class="hover:text-primary transition-colors" href="#">Documentation</a>
+<a class="hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-slate-500 hover:text-primary cursor-pointer">language</span>
+<span class="material-symbols-outlined text-slate-500 hover:text-primary cursor-pointer">help_outline</span>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

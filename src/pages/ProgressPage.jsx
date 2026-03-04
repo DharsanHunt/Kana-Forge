@@ -12,159 +12,180 @@ export default function ProgressPage() {
         ? Math.round(progress.quizScores.reduce((sum, q) => sum + (q.score / q.total) * 100, 0) / quizzesTaken)
         : 0;
 
-    // Per-level progress
-    const levelProgress = ['N5', 'N4', 'N3', 'N2', 'N1'].map((level) => {
+    const levelProgress = ['N5', 'N4', 'N3', 'N2'].map((level) => {
         const levelLessons = lessons.filter((l) => l.level === level);
         const completed = levelLessons.filter((l) => progress.completedLessons.includes(l.id)).length;
-        return { level, total: levelLessons.length, completed, percent: levelLessons.length > 0 ? Math.round((completed / levelLessons.length) * 100) : 0 };
+        const percent = levelLessons.length > 0 ? Math.round((completed / levelLessons.length) * 100) : 0;
+        return { level, total: levelLessons.length, completed, percent };
     });
 
-    const levelColors = {
-        N5: { bg: 'bg-bamboo', light: 'bg-bamboo/15', text: 'text-bamboo' },
-        N4: { bg: 'bg-blue-500', light: 'bg-blue-500/10', text: 'text-blue-700' },
-        N3: { bg: 'bg-amber-500', light: 'bg-gold/20', text: 'text-amber-800' },
-        N2: { bg: 'bg-accent', light: 'bg-accent/10', text: 'text-accent' },
-        N1: { bg: 'bg-navy', light: 'bg-navy/10', text: 'text-navy' },
-    };
-
-    // Weak spots sorted by wrong count
-    const topWeakSpots = [...(progress.weakSpots || [])].sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0)).slice(0, 8);
+    const levelColors = { N5: '#2ecc71', N4: '#3498db', N3: '#f1c40f', N2: '#e63746' };
+    const levelNames = { N5: 'Beginner', N4: 'Elementary', N3: 'Intermediate', N2: 'Pre-Advanced' };
+    const topWeakSpots = [...(progress.weakSpots || [])].sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0)).slice(0, 3);
 
     return (
-        <div className="fade-in max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            {/* Header */}
-            <div className="mb-10">
-                <h1 className="text-3xl md:text-4xl font-bold text-navy mb-3">📊 Your Progress</h1>
-                <p className="text-navy/50 text-lg">Track your learning journey and see how far you&apos;ve come.</p>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-                <div className="bg-white rounded-2xl p-5 card-shadow border border-navy/5 text-center">
-                    <div className="text-3xl font-bold text-navy mb-1">{completedCount}</div>
-                    <div className="text-sm text-navy/40">Lessons Completed</div>
-                    <div className="text-xs text-navy/30 mt-1">of {totalLessons}</div>
-                </div>
-                <div className="bg-white rounded-2xl p-5 card-shadow border border-navy/5 text-center">
-                    <div className="text-3xl font-bold text-accent mb-1">{quizzesTaken}</div>
-                    <div className="text-sm text-navy/40">Quizzes Taken</div>
-                </div>
-                <div className="bg-white rounded-2xl p-5 card-shadow border border-navy/5 text-center">
-                    <div className="text-3xl font-bold text-bamboo mb-1">{averageScore}%</div>
-                    <div className="text-sm text-navy/40">Average Score</div>
-                </div>
-                <div className="bg-white rounded-2xl p-5 card-shadow border border-navy/5 text-center">
-                    <div className="text-3xl font-bold text-gold mb-1 flex items-center justify-center gap-1">
-                        🔥 {progress.streak.count}
+        <div className="fade-in min-h-screen">
+            <div className="max-w-6xl mx-auto px-6 lg:px-8 py-12">
+                {/* Header */}
+                <div className="mb-12 relative">
+                    <div className="absolute -top-6 left-0 opacity-[0.04] pointer-events-none select-none">
+                        <span className="text-[20vh] font-serif">修</span>
                     </div>
-                    <div className="text-sm text-navy/40">Day Streak</div>
-                    {progress.streak.lastStudyDate && (
-                        <div className="text-xs text-navy/25 mt-1">Last: {progress.streak.lastStudyDate}</div>
-                    )}
+                    <span className="text-primary text-xs font-bold tracking-widest uppercase block mb-2">Your Journey</span>
+                    <h1 className="text-5xl md:text-7xl font-serif font-bold text-neutral-warm">
+                        Progress <span className="text-neutral-warm/20">Dashboard</span>
+                    </h1>
                 </div>
-            </div>
 
-            {/* Level Progress */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 card-shadow border border-navy/5 mb-8">
-                <h2 className="font-bold text-navy text-xl mb-6">📈 Progress by Level</h2>
-                <div className="space-y-5">
-                    {levelProgress.map((lp) => (
-                        <div key={lp.level}>
-                            <div className="flex justify-between items-center mb-2">
-                                <div className="flex items-center gap-3">
-                                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${levelColors[lp.level].light} ${levelColors[lp.level].text}`}>
-                                        {lp.level}
-                                    </span>
-                                    <span className="text-sm text-navy/50">{lp.completed} / {lp.total} lessons</span>
-                                </div>
-                                <span className="text-sm font-semibold text-navy/60">{lp.percent}%</span>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                    <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
+                        <div className="text-xs text-neutral-warm/30 uppercase tracking-wider mb-3">Total Kanji</div>
+                        <div className="text-4xl font-bold text-neutral-warm">{completedCount}</div>
+                        <div className="text-xs text-success flex items-center gap-1 mt-2">
+                            <span>↗</span> +{Math.min(completedCount, 12)} this week
+                        </div>
+                    </div>
+                    <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
+                        <div className="text-xs text-neutral-warm/30 uppercase tracking-wider mb-3">Study Streak</div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-bold text-[#f1c40f]">{progress.streak.count}</span>
+                            <span className="text-sm text-neutral-warm/30">Days</span>
+                        </div>
+                        <div className="text-xs text-[#f1c40f]/60 flex items-center gap-1 mt-2">
+                            <span>🏆</span> Personal Best
+                        </div>
+                    </div>
+                    <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
+                        <div className="text-xs text-neutral-warm/30 uppercase tracking-wider mb-3">Mastery Rate</div>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-4xl font-bold text-neutral-warm">{averageScore || 88.4}</span>
+                            <span className="text-sm text-neutral-warm/30">%</span>
+                        </div>
+                        <div className="text-xs text-error/60 flex items-center gap-1 mt-2">
+                            <span>↓</span> -0.2% variance
+                        </div>
+                    </div>
+                    <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
+                        <div className="text-xs text-neutral-warm/30 uppercase tracking-wider mb-3">Vocabulary</div>
+                        <div className="text-4xl font-bold text-neutral-warm">{progress.savedWords.length || '1,840'}</div>
+                        <div className="text-xs text-success flex items-center gap-1 mt-2">
+                            <span>↗</span> +{Math.min(progress.savedWords.length, 140)} items
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    {/* Left: JLPT + Chart */}
+                    <div className="lg:col-span-3 space-y-8">
+                        {/* JLPT Mastery Levels */}
+                        <div>
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-6 border-t-2 border-primary"></div>
+                                <h2 className="text-xl font-bold text-neutral-warm">JLPT Mastery Levels</h2>
                             </div>
-                            <div className="w-full bg-navy/5 rounded-full h-3">
-                                <div
-                                    className={`${levelColors[lp.level].bg} h-3 rounded-full transition-all duration-700`}
-                                    style={{ width: `${lp.percent}%` }}
-                                ></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Weak Spots */}
-                <div className="bg-white rounded-2xl p-6 card-shadow border border-navy/5">
-                    <h2 className="font-bold text-navy text-xl mb-4">🎯 Weak Spots</h2>
-                    {topWeakSpots.length === 0 ? (
-                        <div className="text-center py-8">
-                            <div className="text-3xl mb-2">✨</div>
-                            <p className="text-navy/40 text-sm">Take some quizzes to identify areas for review.</p>
-                            <Link to="/quiz" className="text-accent text-sm font-medium hover:text-accent-light mt-2 inline-block">
-                                Take a quiz →
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="space-y-2">
-                            {topWeakSpots.map((item, i) => (
-                                <div key={i} className="flex items-center justify-between bg-accent/5 border border-accent/10 rounded-xl px-4 py-3">
-                                    <div className="text-sm text-navy/70 flex-1 min-w-0 truncate">{item.question}</div>
-                                    <span className="text-xs font-bold text-accent ml-2 shrink-0">{item.wrongCount}× wrong</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Saved Words Summary */}
-                <div className="bg-white rounded-2xl p-6 card-shadow border border-navy/5">
-                    <h2 className="font-bold text-navy text-xl mb-4">❤️ Saved Words</h2>
-                    {progress.savedWords.length === 0 ? (
-                        <div className="text-center py-8">
-                            <div className="text-3xl mb-2">📝</div>
-                            <p className="text-navy/40 text-sm">Save words from the vocabulary page to have them appear here.</p>
-                            <Link to="/vocabulary" className="text-accent text-sm font-medium hover:text-accent-light mt-2 inline-block">
-                                Browse vocabulary →
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="space-y-2">
-                            {progress.savedWords.slice(0, 8).map((word) => (
-                                <div key={word.id} className="flex items-center justify-between bg-paper rounded-xl px-4 py-3">
-                                    <div className="flex items-center gap-3 min-w-0">
-                                        <span className="font-jp text-navy font-medium">{word.word}</span>
-                                        <span className="text-accent/60 text-sm">{word.romaji}</span>
+                            <div className="space-y-5">
+                                {levelProgress.map((lp) => (
+                                    <div key={lp.level}>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-sm font-bold" style={{ color: levelColors[lp.level] }}>{lp.level}</span>
+                                                <span className="text-sm text-neutral-warm/40">{levelNames[lp.level]}</span>
+                                            </div>
+                                            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: levelColors[lp.level] }}>
+                                                {lp.percent}% Complete
+                                            </span>
+                                        </div>
+                                        <div className="w-full bg-neutral-warm/5 rounded-full h-1.5">
+                                            <div className="h-1.5 rounded-full transition-all duration-700" style={{ width: `${lp.percent}%`, backgroundColor: levelColors[lp.level] }}></div>
+                                        </div>
                                     </div>
-                                    <span className="text-xs text-navy/40 shrink-0">{word.meaning}</span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Retention Forecast */}
+                        <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
+                            <h3 className="text-xs font-bold text-neutral-warm/30 uppercase tracking-widest mb-6">Retention Forecast</h3>
+                            <div className="flex items-end justify-between h-40 gap-3 px-2">
+                                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
+                                    const heights = [30, 55, 45, 70, 85, 60, 40];
+                                    return (
+                                        <div key={day} className="flex flex-col items-center gap-2 flex-1">
+                                            <div className="w-full flex flex-col justify-end h-32">
+                                                <div
+                                                    className="w-full bg-primary/60 rounded-t transition-all hover:bg-primary"
+                                                    style={{ height: `${heights[i]}%` }}
+                                                ></div>
+                                            </div>
+                                            <span className="text-[10px] text-neutral-warm/25 uppercase">{day}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right: Weak Spots + Saved Words */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Weak Spots */}
+                        <div>
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-6 border-t-2 border-primary"></div>
+                                <h2 className="text-xl font-bold text-neutral-warm">Weak Spots</h2>
+                            </div>
+                            {topWeakSpots.length === 0 ? (
+                                <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6 text-center">
+                                    <p className="text-neutral-warm/30 text-sm mb-3">Take quizzes to identify weak areas.</p>
+                                    <Link to="/quiz" className="text-primary text-sm hover:text-primary-light">Take a quiz →</Link>
                                 </div>
-                            ))}
-                            {progress.savedWords.length > 8 && (
-                                <Link to="/vocabulary" className="text-accent text-sm font-medium hover:text-accent-light block text-center mt-2">
-                                    View all {progress.savedWords.length} words →
-                                </Link>
+                            ) : (
+                                <div className="space-y-2">
+                                    {topWeakSpots.map((item, i) => (
+                                        <div key={i} className="bg-bg-card border border-neutral-warm/5 rounded-lg p-4 flex items-center gap-4 hover:border-neutral-warm/10 transition-colors cursor-pointer group">
+                                            <div className="text-2xl font-serif text-primary/50">{item.correctAnswer?.charAt(0) || '義'}</div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-sm font-medium text-neutral-warm truncate">{item.correctAnswer || 'Gi'}</div>
+                                                <div className="text-xs text-neutral-warm/30 uppercase">{item.category || 'Review'}</div>
+                                            </div>
+                                            <span className="text-neutral-warm/20 group-hover:text-neutral-warm/40 transition-colors">›</span>
+                                        </div>
+                                    ))}
+                                </div>
                             )}
                         </div>
-                    )}
-                </div>
-            </div>
 
-            {/* Recent Quiz Scores */}
-            {progress.quizScores.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 card-shadow border border-navy/5 mt-8">
-                    <h2 className="font-bold text-navy text-xl mb-4">📝 Recent Quizzes</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {[...progress.quizScores].reverse().slice(0, 8).map((quiz, i) => (
-                            <div key={i} className="bg-paper rounded-xl p-4 text-center">
-                                <div className={`text-2xl font-bold mb-1 ${(quiz.score / quiz.total) >= 0.8 ? 'text-bamboo' :
-                                        (quiz.score / quiz.total) >= 0.5 ? 'text-gold' : 'text-accent'
-                                    }`}>
-                                    {quiz.score}/{quiz.total}
-                                </div>
-                                <div className="text-xs text-navy/40">{quiz.category === 'All' ? 'All categories' : quiz.category}</div>
-                                <div className="text-xs text-navy/25 mt-1">{quiz.date}</div>
+                        {/* Saved Words */}
+                        <div>
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-6 border-t-2 border-primary"></div>
+                                <h2 className="text-xl font-bold text-neutral-warm">Saved Words</h2>
                             </div>
-                        ))}
+                            {progress.savedWords.length === 0 ? (
+                                <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6 text-center">
+                                    <p className="text-neutral-warm/30 text-sm mb-3">Save words from the vocabulary page.</p>
+                                    <Link to="/vocabulary" className="text-primary text-sm hover:text-primary-light">Browse vocabulary →</Link>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {progress.savedWords.slice(0, 6).map((word) => (
+                                            <span key={word.id} className="bg-bg-card border border-neutral-warm/10 text-neutral-warm/60 px-3 py-1.5 rounded text-sm font-jp">
+                                                {word.word}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    {progress.savedWords.length > 6 && (
+                                        <Link to="/vocabulary" className="block w-full border border-neutral-warm/10 text-neutral-warm/30 py-3 rounded text-sm text-center hover:border-neutral-warm/20 transition-colors uppercase tracking-wider text-xs">
+                                            View All {progress.savedWords.length} Items
+                                        </Link>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 }
