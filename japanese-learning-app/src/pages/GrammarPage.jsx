@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { grammar } from '../data/grammar';
 
 const levels = ['N5', 'N4', 'N3', 'N2', 'N1'];
@@ -30,15 +31,15 @@ export default function GrammarPage() {
                     <div className="sticky top-24">
                         <h4 className="text-xs font-bold text-neutral-warm/30 uppercase tracking-widest mb-4">Main Menu</h4>
                         <div className="space-y-1">
-                            <div className="flex items-center gap-3 px-3 py-2 rounded text-neutral-warm/40 hover:text-neutral-warm hover:bg-neutral-warm/5 transition-colors cursor-pointer">
+                            <Link to="/progress" className="flex items-center gap-3 px-3 py-2 rounded text-neutral-warm/40 hover:text-neutral-warm hover:bg-neutral-warm/5 transition-colors">
                                 <span className="text-xs">📊</span> <span className="text-sm">Dashboard</span>
-                            </div>
+                            </Link>
                             <div className="flex items-center gap-3 px-3 py-2 rounded bg-primary/10 text-primary border-l-2 border-primary">
                                 <span className="text-xs">📖</span> <span className="text-sm font-medium">Grammar Library</span>
                             </div>
-                            <div className="flex items-center gap-3 px-3 py-2 rounded text-neutral-warm/40 hover:text-neutral-warm hover:bg-neutral-warm/5 transition-colors cursor-pointer">
+                            <Link to="/vocabulary" className="flex items-center gap-3 px-3 py-2 rounded text-neutral-warm/40 hover:text-neutral-warm hover:bg-neutral-warm/5 transition-colors">
                                 <span className="text-xs">文</span> <span className="text-sm">Vocabulary</span>
-                            </div>
+                            </Link>
                         </div>
 
                         <div className="mt-8">
@@ -82,8 +83,8 @@ export default function GrammarPage() {
                                 key={level}
                                 onClick={() => setSelectedLevel(level)}
                                 className={`px-5 py-2.5 text-sm font-medium rounded transition-all ${selectedLevel === level
-                                        ? 'bg-primary text-white'
-                                        : 'border border-neutral-warm/10 text-neutral-warm/40 hover:border-neutral-warm/20'
+                                    ? 'bg-primary text-white'
+                                    : 'border border-neutral-warm/10 text-neutral-warm/40 hover:border-neutral-warm/20'
                                     }`}
                             >
                                 {level}
