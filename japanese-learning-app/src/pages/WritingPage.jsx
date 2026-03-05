@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { hiragana } from '../data/hiragana';
 import { katakana } from '../data/katakana';
+import DrawingCanvas from '../components/DrawingCanvas';
 
 const tabs = ['Hiragana', 'Katakana', 'Kanji'];
 
@@ -10,6 +11,15 @@ export default function WritingPage() {
     const [quizMode, setQuizMode] = useState(false);
     const [quizAnswer, setQuizAnswer] = useState('');
     const [quizFeedback, setQuizFeedback] = useState(null);
+
+    // AI stroke check state
+    const [isChecking, setIsChecking] = useState(false);
+    const [aiResult, setAiResult] = useState(null);
+    const [apiKey, setApiKey] = useState(() => {
+        try { return localStorage.getItem('kana-forge-api-key') || ''; } catch { return ''; }
+    });
+    const [showApiKeyPrompt, setShowApiKeyPrompt] = useState(false);
+    const [pendingImage, setPendingImage] = useState(null);
 
     const characters = activeTab === 'Hiragana' ? hiragana : activeTab === 'Katakana' ? katakana : [];
 
@@ -42,6 +52,101 @@ export default function WritingPage() {
         setSelectedChar(randomChar);
     };
 
+    // AI stroke checking with Claude Vision
+    const checkStrokeWithAI = async (imageDataUrl) => {
+        const effectiveApiKey = apiKey || import.meta.env.VITE_ANTHROPIC_API_KEY || '';
+        if (!effectiveApiKey) {
+            setPendingImage(imageDataUrl);
+            setShowApiKeyPrompt(true);
+            return;
+        }
+
+        setIsChecking(true);
+        setAiResult(null);
+
+        // Strip the data:image/png;base64, prefix
+        const base64Data = imageDataUrl.split(',')[1];
+
+        try {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': effectiveApiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true',
+                },
+                body: JSON.stringify({
+                    model: 'claude-opus-4-6',
+                    max_tokens: 300,
+                    messages: [
+                        {
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'image',
+                                    source: {
+                                        type: 'base64',
+                                        media_type: 'image/png',
+                                        data: base64Data,
+                                    },
+                                },
+                                {
+                                    type: 'text',
+                                    text: `I am practicing writing the Japanese ${activeTab.toLowerCase()} character "${selectedChar.character}" (${selectedChar.romaji}). 
+
+Please analyze my handwritten attempt in the image and respond in this exact JSON format only, no other text:
+{"match": true/false, "score": 1-10, "feedback": "brief feedback about stroke accuracy"}
+
+Rules:
+- "match" = true if the character is recognizable as ${selectedChar.character}, even if imperfect
+- "score" = 1 (unrecognizable) to 10 (perfect)
+- "feedback" = one sentence about stroke quality, proportions, or what to improve
+- Be encouraging but honest
+- If you literally cannot see any strokes or the canvas appears blank, set match to false and score to 0`,
+                                },
+                            ],
+                        },
+                    ],
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.error?.message || `API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const text = data.content[0].text;
+
+            // Parse JSON from the response
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const result = JSON.parse(jsonMatch[0]);
+                setAiResult(result);
+            } else {
+                setAiResult({ match: false, score: 0, feedback: text });
+            }
+        } catch (error) {
+            setAiResult({
+                match: false,
+                score: 0,
+                feedback: `Error: ${error.message}. Check your API key.`,
+            });
+        } finally {
+            setIsChecking(false);
+        }
+    };
+
+    const handleApiKeySave = () => {
+        try { localStorage.setItem('kana-forge-api-key', apiKey); } catch { }
+        setShowApiKeyPrompt(false);
+        if (pendingImage) {
+            checkStrokeWithAI(pendingImage);
+            setPendingImage(null);
+        }
+    };
+
     return (
         <div className="fade-in min-h-screen">
             <div className="max-w-6xl mx-auto px-6 lg:px-8 py-12">
@@ -56,7 +161,7 @@ export default function WritingPage() {
                     {tabs.map((tab) => (
                         <button
                             key={tab}
-                            onClick={() => { setActiveTab(tab); setSelectedChar(null); setQuizMode(false); }}
+                            onClick={() => { setActiveTab(tab); setSelectedChar(null); setQuizMode(false); setAiResult(null); }}
                             className={`px-8 py-4 text-sm font-medium transition-all relative ${activeTab === tab
                                     ? 'text-primary'
                                     : 'text-neutral-warm/40 hover:text-neutral-warm/70'
@@ -84,7 +189,7 @@ export default function WritingPage() {
                                 {characters.map((charItem) => (
                                     <button
                                         key={charItem.character}
-                                        onClick={() => { setSelectedChar(charItem); setQuizMode(false); }}
+                                        onClick={() => { setSelectedChar(charItem); setQuizMode(false); setAiResult(null); }}
                                         className={`aspect-square flex flex-col items-center justify-center rounded transition-all text-center ${selectedChar?.character === charItem.character
                                                 ? 'bg-primary/10 border border-primary/40 text-primary'
                                                 : 'bg-bg-card border border-neutral-warm/5 text-neutral-warm hover:border-neutral-warm/20'
@@ -116,10 +221,6 @@ export default function WritingPage() {
                                             placeholder="|"
                                             autoFocus
                                         />
-                                        <div className="flex justify-between mt-3 text-xs text-neutral-warm/30">
-                                            <span>Stroke 1 of {selectedChar.strokeOrder?.split(',').length || 3}</span>
-                                            <button className="text-primary hover:text-primary-light transition-colors">Show Stroke Order</button>
-                                        </div>
                                     </div>
 
                                     {quizFeedback === 'correct' && (
@@ -139,7 +240,7 @@ export default function WritingPage() {
                                     onClick={startQuiz}
                                     className="w-full bg-bg-card border border-neutral-warm/10 text-neutral-warm/50 py-4 rounded hover:border-primary/30 hover:text-primary transition-all text-sm font-medium"
                                 >
-                                    Start Practice Mode
+                                    Start Romaji Quiz Mode
                                 </button>
                             )}
                         </div>
@@ -148,31 +249,56 @@ export default function WritingPage() {
                         <div className="lg:col-span-2">
                             {selectedChar ? (
                                 <div className="bg-bg-card border border-neutral-warm/5 rounded-xl p-6 sticky top-24 fade-in">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className="text-neutral-warm/20 text-xs">♫</span>
-                                        <span className="text-neutral-warm/20 text-xs cursor-pointer hover:text-primary transition-colors">★</span>
+                                    {/* Character display */}
+                                    <div className="text-center mb-5">
+                                        <div className="font-jp text-6xl text-neutral-warm mb-1">{selectedChar.character}</div>
+                                        <div className="text-primary text-lg font-medium">{selectedChar.romaji}</div>
                                     </div>
 
-                                    <div className="text-center mb-6">
-                                        <div className="font-jp text-7xl text-neutral-warm mb-2">{selectedChar.character}</div>
-                                        <div className="text-primary text-xl">{selectedChar.romaji}</div>
+                                    {/* Drawing Canvas */}
+                                    <div className="mb-5">
+                                        <h4 className="text-xs font-bold text-neutral-warm/40 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                            Stroke Practice
+                                        </h4>
+                                        <DrawingCanvas
+                                            character={selectedChar.character}
+                                            onCheck={checkStrokeWithAI}
+                                            onClear={() => setAiResult(null)}
+                                            isChecking={isChecking}
+                                        />
                                     </div>
 
-                                    {/* Stroke Practice */}
-                                    <div className="mb-6">
-                                        <h4 className="text-xs font-bold text-neutral-warm/40 uppercase tracking-wider mb-3">Stroke Practice</h4>
-                                        <div className="grid grid-cols-2 gap-1">
-                                            {[...Array(4)].map((_, i) => (
-                                                <div key={i} className="aspect-square bg-bg-elevated border border-neutral-warm/5 rounded"></div>
-                                            ))}
+                                    {/* AI Result */}
+                                    {aiResult && (
+                                        <div className={`mb-5 p-4 rounded-lg border fade-in ${aiResult.match
+                                                ? 'bg-success/5 border-success/20'
+                                                : 'bg-error/5 border-error/20'
+                                            }`}>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-lg ${aiResult.match ? 'text-success' : 'text-error'}`}>
+                                                        {aiResult.match ? '✓' : '✗'}
+                                                    </span>
+                                                    <span className={`text-sm font-bold ${aiResult.match ? 'text-success' : 'text-error'}`}>
+                                                        {aiResult.match ? 'Character Recognized!' : 'Try Again'}
+                                                    </span>
+                                                </div>
+                                                {aiResult.score > 0 && (
+                                                    <div className="flex items-center gap-1">
+                                                        <span className={`text-2xl font-bold ${aiResult.score >= 7 ? 'text-success' :
+                                                                aiResult.score >= 4 ? 'text-[#f1c40f]' :
+                                                                    'text-error'
+                                                            }`}>{aiResult.score}</span>
+                                                        <span className="text-neutral-warm/30 text-xs">/10</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <p className="text-neutral-warm/60 text-sm leading-relaxed">{aiResult.feedback}</p>
                                         </div>
-                                        <div className="flex gap-2 mt-3">
-                                            <button className="flex-1 py-2 bg-bg-elevated border border-neutral-warm/10 rounded text-sm text-neutral-warm/50 hover:text-neutral-warm hover:border-neutral-warm/20 transition-colors">Clear</button>
-                                            <button className="flex-1 py-2 bg-primary text-white rounded text-sm font-bold hover:bg-primary-light transition-colors">Check</button>
-                                        </div>
-                                    </div>
+                                    )}
 
-                                    {/* Stroke Order */}
+                                    {/* Stroke Order Info */}
                                     {selectedChar.strokeOrder && (
                                         <div className="mb-4">
                                             <h4 className="text-xs font-bold text-neutral-warm/40 uppercase tracking-wider mb-2">Stroke Order</h4>
@@ -195,13 +321,48 @@ export default function WritingPage() {
                             ) : (
                                 <div className="bg-bg-card border border-neutral-warm/5 rounded-xl p-8 text-center">
                                     <div className="text-4xl font-serif text-neutral-warm/10 mb-3">選</div>
-                                    <p className="text-neutral-warm/30 text-sm">Select a character to view details</p>
+                                    <p className="text-neutral-warm/30 text-sm">Select a character to practice drawing</p>
                                 </div>
                             )}
                         </div>
                     </div>
                 )}
             </div>
+
+            {/* API Key Prompt Modal */}
+            {showApiKeyPrompt && (
+                <div className="fixed inset-0 bg-bg-dark/80 backdrop-blur-sm z-50 flex items-center justify-center fade-in">
+                    <div className="bg-bg-card border border-neutral-warm/10 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+                        <h3 className="font-bold text-neutral-warm text-lg mb-2">API Key Required</h3>
+                        <p className="text-neutral-warm/40 text-sm mb-4">Enter your Anthropic API key for AI stroke checking.</p>
+                        <input
+                            type="password"
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            placeholder="sk-ant-..."
+                            className="w-full px-4 py-3 bg-bg-elevated border border-neutral-warm/10 rounded text-sm text-neutral-warm mb-2 focus:outline-none focus:border-primary/50"
+                            autoFocus
+                            onKeyDown={(e) => e.key === 'Enter' && handleApiKeySave()}
+                        />
+                        <p className="text-xs text-neutral-warm/20 mb-4">Stored locally only. Never shared.</p>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => { setShowApiKeyPrompt(false); setPendingImage(null); }}
+                                className="flex-1 py-2.5 bg-bg-elevated text-neutral-warm/50 rounded text-sm"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleApiKeySave}
+                                disabled={!apiKey.trim()}
+                                className="flex-1 py-2.5 bg-primary text-white rounded text-sm font-bold disabled:opacity-30"
+                            >
+                                Save & Check
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
