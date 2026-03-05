@@ -39,7 +39,7 @@ export default function ChatPage() {
     const [selectedLevel, setSelectedLevel] = useState('N5');
     const [chatStarted, setChatStarted] = useState(false);
     const [apiKey, setApiKey] = useState(() => {
-        try { return localStorage.getItem('kana-forge-api-key') || ''; } catch { return ''; }
+        try { return localStorage.getItem('kana-forge-groq-key') || ''; } catch { return ''; }
     });
     const [showApiKeyInput, setShowApiKeyInput] = useState(false);
     const messagesEndRef = useRef(null);
@@ -50,7 +50,7 @@ export default function ChatPage() {
 
     const saveApiKey = (key) => {
         setApiKey(key);
-        try { localStorage.setItem('kana-forge-api-key', key); } catch { }
+        try { localStorage.setItem('kana-forge-groq-key', key); } catch { }
     };
 
     const startChat = () => {
@@ -65,7 +65,7 @@ export default function ChatPage() {
     const sendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
-        const effectiveApiKey = apiKey || import.meta.env.VITE_ANTHROPIC_API_KEY || '';
+        const effectiveApiKey = apiKey || import.meta.env.VITE_GROQ_API_KEY || '';
         if (!effectiveApiKey) {
             setShowApiKeyInput(true);
             return;
@@ -85,19 +85,20 @@ export default function ChatPage() {
             .map((m) => ({ role: m.role, content: m.content }));
 
         try {
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': effectiveApiKey,
-                    'anthropic-version': '2023-06-01',
-                    'anthropic-dangerous-direct-browser-access': 'true',
+                    'Authorization': `Bearer ${effectiveApiKey}`,
                 },
                 body: JSON.stringify({
-                    model: 'claude-opus-4-6',
+                    model: 'llama-3.3-70b-versatile',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        ...conversationHistory,
+                    ],
                     max_tokens: 1000,
-                    system: systemPrompt,
-                    messages: conversationHistory,
+                    temperature: 0.7,
                 }),
             });
 
@@ -107,7 +108,8 @@ export default function ChatPage() {
             }
 
             const data = await response.json();
-            setMessages((prev) => [...prev, { role: 'assistant', content: data.content[0].text }]);
+            const assistantMessage = data.choices?.[0]?.message?.content || 'No response received.';
+            setMessages((prev) => [...prev, { role: 'assistant', content: assistantMessage }]);
         } catch (error) {
             setMessages((prev) => [...prev, { role: 'assistant', content: `⚠️ Connection error: ${error.message}` }]);
         } finally {
@@ -134,23 +136,13 @@ export default function ChatPage() {
         return (
             <div className="fade-in min-h-screen">
                 <div className="max-w-3xl mx-auto px-6 lg:px-8 py-12">
-                    <h1 className="text-3xl md:text-4xl font-bold text-neutral-warm mb-2">AI Conversation Coach</h1>
+                    <div className="flex items-center gap-4 mb-2">
+                        <img src="/kana-forge-logo.png" alt="Kana Forge" className="w-12 h-12 rounded-lg shadow-lg shadow-primary/20" />
+                        <h1 className="text-3xl md:text-4xl font-bold text-neutral-warm">AI Conversation Coach</h1>
+                    </div>
                     <p className="text-neutral-warm/40 text-sm font-light mb-10">Practice with Hana Sensei, your patient AI tutor.</p>
 
                     <div className="bg-bg-card border border-neutral-warm/5 rounded-xl p-6 md:p-8 space-y-6">
-                        {/* API Key */}
-                        <div>
-                            <h3 className="text-xs font-bold text-neutral-warm/40 uppercase tracking-widest mb-3">API Key</h3>
-                            <input
-                                type="password"
-                                value={apiKey}
-                                onChange={(e) => saveApiKey(e.target.value)}
-                                placeholder="Enter your Anthropic API key..."
-                                className="w-full px-4 py-3 bg-bg-elevated border border-neutral-warm/10 rounded text-sm text-neutral-warm placeholder:text-neutral-warm/25 focus:outline-none focus:border-primary/50"
-                            />
-                            <p className="text-xs text-neutral-warm/20 mt-1.5">Stored locally. Never shared.</p>
-                        </div>
-
                         {/* Topic */}
                         <div>
                             <h3 className="text-xs font-bold text-neutral-warm/40 uppercase tracking-widest mb-3">Topic</h3>
@@ -234,8 +226,8 @@ export default function ChatPage() {
                                     {msg.role === 'assistant' && <span className="text-xs text-primary mb-1 block font-bold">Hana Sensei</span>}
                                     {msg.role === 'user' && <span className="text-xs text-neutral-warm/30 mb-1 block text-right">Learner</span>}
                                     <div className={`rounded-xl px-5 py-4 text-sm leading-relaxed ${msg.role === 'user'
-                                            ? 'bg-primary/10 text-neutral-warm border border-primary/20'
-                                            : 'bg-bg-card border border-neutral-warm/5 text-neutral-warm/80'
+                                        ? 'bg-primary/10 text-neutral-warm border border-primary/20'
+                                        : 'bg-bg-card border border-neutral-warm/5 text-neutral-warm/80'
                                         }`}>
                                         <div className="font-jp">{renderMessageContent(msg.content)}</div>
                                     </div>
@@ -266,21 +258,6 @@ export default function ChatPage() {
                     </div>
                 </div>
             </div>
-
-            {/* API Key modal */}
-            {showApiKeyInput && (
-                <div className="fixed inset-0 bg-bg-dark/80 backdrop-blur-sm z-50 flex items-center justify-center fade-in">
-                    <div className="bg-bg-card border border-neutral-warm/10 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
-                        <h3 className="font-bold text-neutral-warm text-lg mb-3">API Key Required</h3>
-                        <input type="password" value={apiKey} onChange={(e) => saveApiKey(e.target.value)} placeholder="sk-ant-..."
-                            className="w-full px-4 py-3 bg-bg-elevated border border-neutral-warm/10 rounded text-sm text-neutral-warm mb-4 focus:outline-none focus:border-primary/50" autoFocus />
-                        <div className="flex gap-2">
-                            <button onClick={() => setShowApiKeyInput(false)} className="flex-1 py-2.5 bg-bg-elevated text-neutral-warm/50 rounded text-sm">Cancel</button>
-                            <button onClick={() => { setShowApiKeyInput(false); sendMessage(); }} className="flex-1 py-2.5 bg-primary text-white rounded text-sm font-bold">Save & Send</button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Input */}
             <div className="border-t border-neutral-warm/5 bg-bg-dark px-4 py-4">
