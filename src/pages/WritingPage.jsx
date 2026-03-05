@@ -16,7 +16,7 @@ export default function WritingPage() {
     const [isChecking, setIsChecking] = useState(false);
     const [aiResult, setAiResult] = useState(null);
     const [apiKey, setApiKey] = useState(() => {
-        try { return localStorage.getItem('kana-forge-api-key') || ''; } catch { return ''; }
+        try { return localStorage.getItem('kana-forge-gemini-key') || ''; } catch { return ''; }
     });
     const [showApiKeyPrompt, setShowApiKeyPrompt] = useState(false);
     const [pendingImage, setPendingImage] = useState(null);
@@ -52,9 +52,9 @@ export default function WritingPage() {
         setSelectedChar(randomChar);
     };
 
-    // AI stroke checking with Claude Vision
+    // AI stroke checking with Gemini 2.5 Flash
     const checkStrokeWithAI = async (imageDataUrl) => {
-        const effectiveApiKey = apiKey || import.meta.env.VITE_ANTHROPIC_API_KEY || '';
+        const effectiveApiKey = apiKey || import.meta.env.VITE_GEMINI_API_KEY || '';
         if (!effectiveApiKey) {
             setPendingImage(imageDataUrl);
             setShowApiKeyPrompt(true);
@@ -68,32 +68,23 @@ export default function WritingPage() {
         const base64Data = imageDataUrl.split(',')[1];
 
         try {
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': effectiveApiKey,
-                    'anthropic-version': '2023-06-01',
-                    'anthropic-dangerous-direct-browser-access': 'true',
-                },
-                body: JSON.stringify({
-                    model: 'claude-opus-4-6',
-                    max_tokens: 300,
-                    messages: [
-                        {
-                            role: 'user',
-                            content: [
-                                {
-                                    type: 'image',
-                                    source: {
-                                        type: 'base64',
-                                        media_type: 'image/png',
-                                        data: base64Data,
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${effectiveApiKey}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        inline_data: {
+                                            mime_type: 'image/png',
+                                            data: base64Data,
+                                        },
                                     },
-                                },
-                                {
-                                    type: 'text',
-                                    text: `I am practicing writing the Japanese ${activeTab.toLowerCase()} character "${selectedChar.character}" (${selectedChar.romaji}). 
+                                    {
+                                        text: `I am practicing writing the Japanese ${activeTab.toLowerCase()} character "${selectedChar.character}" (${selectedChar.romaji}). 
 
 Please analyze my handwritten attempt in the image and respond in this exact JSON format only, no other text:
 {"match": true/false, "score": 1-10, "feedback": "brief feedback about stroke accuracy"}
@@ -104,12 +95,27 @@ Rules:
 - "feedback" = one sentence about stroke quality, proportions, or what to improve
 - Be encouraging but honest
 - If you literally cannot see any strokes or the canvas appears blank, set match to false and score to 0`,
+                                    },
+                                ],
+                            },
+                        ],
+                        generationConfig: {
+                            temperature: 0.3,
+                            maxOutputTokens: 2048,
+                            responseMimeType: 'application/json',
+                            responseSchema: {
+                                type: 'OBJECT',
+                                properties: {
+                                    match: { type: 'BOOLEAN' },
+                                    score: { type: 'INTEGER' },
+                                    feedback: { type: 'STRING' },
                                 },
-                            ],
+                                required: ['match', 'score', 'feedback'],
+                            },
                         },
-                    ],
-                }),
-            });
+                    }),
+                }
+            );
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);
@@ -117,15 +123,19 @@ Rules:
             }
 
             const data = await response.json();
-            const text = data.content[0].text;
 
-            // Parse JSON from the response
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                const result = JSON.parse(jsonMatch[0]);
-                setAiResult(result);
+            // With responseMimeType: "application/json", Gemini returns structured JSON directly
+            const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (responseText) {
+                try {
+                    const result = JSON.parse(responseText);
+                    setAiResult(result);
+                } catch {
+                    setAiResult({ match: false, score: 0, feedback: responseText });
+                }
             } else {
-                setAiResult({ match: false, score: 0, feedback: text });
+                setAiResult({ match: false, score: 0, feedback: 'No valid JSON response from AI.' });
             }
         } catch (error) {
             setAiResult({
@@ -139,7 +149,7 @@ Rules:
     };
 
     const handleApiKeySave = () => {
-        try { localStorage.setItem('kana-forge-api-key', apiKey); } catch { }
+        try { localStorage.setItem('kana-forge-gemini-key', apiKey); } catch { }
         setShowApiKeyPrompt(false);
         if (pendingImage) {
             checkStrokeWithAI(pendingImage);
@@ -163,8 +173,8 @@ Rules:
                             key={tab}
                             onClick={() => { setActiveTab(tab); setSelectedChar(null); setQuizMode(false); setAiResult(null); }}
                             className={`px-8 py-4 text-sm font-medium transition-all relative ${activeTab === tab
-                                    ? 'text-primary'
-                                    : 'text-neutral-warm/40 hover:text-neutral-warm/70'
+                                ? 'text-primary'
+                                : 'text-neutral-warm/40 hover:text-neutral-warm/70'
                                 }`}
                         >
                             {tab}
@@ -191,8 +201,8 @@ Rules:
                                         key={charItem.character}
                                         onClick={() => { setSelectedChar(charItem); setQuizMode(false); setAiResult(null); }}
                                         className={`aspect-square flex flex-col items-center justify-center rounded transition-all text-center ${selectedChar?.character === charItem.character
-                                                ? 'bg-primary/10 border border-primary/40 text-primary'
-                                                : 'bg-bg-card border border-neutral-warm/5 text-neutral-warm hover:border-neutral-warm/20'
+                                            ? 'bg-primary/10 border border-primary/40 text-primary'
+                                            : 'bg-bg-card border border-neutral-warm/5 text-neutral-warm hover:border-neutral-warm/20'
                                             }`}
                                     >
                                         <span className="font-jp text-lg leading-none">{charItem.character}</span>
@@ -215,8 +225,8 @@ Rules:
                                             onChange={(e) => setQuizAnswer(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && (quizFeedback === 'correct' ? nextQuizChar() : checkQuizAnswer())}
                                             className={`w-full px-4 py-4 bg-bg-elevated border-2 rounded text-center text-lg font-jp focus:outline-none transition-colors ${quizFeedback === 'correct' ? 'border-success text-success' :
-                                                    quizFeedback === 'wrong' ? 'border-error text-error' :
-                                                        'border-primary/40 text-neutral-warm focus:border-primary'
+                                                quizFeedback === 'wrong' ? 'border-error text-error' :
+                                                    'border-primary/40 text-neutral-warm focus:border-primary'
                                                 }`}
                                             placeholder="|"
                                             autoFocus
@@ -272,8 +282,8 @@ Rules:
                                     {/* AI Result */}
                                     {aiResult && (
                                         <div className={`mb-5 p-4 rounded-lg border fade-in ${aiResult.match
-                                                ? 'bg-success/5 border-success/20'
-                                                : 'bg-error/5 border-error/20'
+                                            ? 'bg-success/5 border-success/20'
+                                            : 'bg-error/5 border-error/20'
                                             }`}>
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center gap-2">
@@ -287,8 +297,8 @@ Rules:
                                                 {aiResult.score > 0 && (
                                                     <div className="flex items-center gap-1">
                                                         <span className={`text-2xl font-bold ${aiResult.score >= 7 ? 'text-success' :
-                                                                aiResult.score >= 4 ? 'text-[#f1c40f]' :
-                                                                    'text-error'
+                                                            aiResult.score >= 4 ? 'text-[#f1c40f]' :
+                                                                'text-error'
                                                             }`}>{aiResult.score}</span>
                                                         <span className="text-neutral-warm/30 text-xs">/10</span>
                                                     </div>
@@ -334,12 +344,12 @@ Rules:
                 <div className="fixed inset-0 bg-bg-dark/80 backdrop-blur-sm z-50 flex items-center justify-center fade-in">
                     <div className="bg-bg-card border border-neutral-warm/10 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
                         <h3 className="font-bold text-neutral-warm text-lg mb-2">API Key Required</h3>
-                        <p className="text-neutral-warm/40 text-sm mb-4">Enter your Anthropic API key for AI stroke checking.</p>
+                        <p className="text-neutral-warm/40 text-sm mb-4">Enter your Google Gemini API key for AI stroke checking.</p>
                         <input
                             type="password"
                             value={apiKey}
                             onChange={(e) => setApiKey(e.target.value)}
-                            placeholder="sk-ant-..."
+                            placeholder="AIzaSy..."
                             className="w-full px-4 py-3 bg-bg-elevated border border-neutral-warm/10 rounded text-sm text-neutral-warm mb-2 focus:outline-none focus:border-primary/50"
                             autoFocus
                             onKeyDown={(e) => e.key === 'Enter' && handleApiKeySave()}
