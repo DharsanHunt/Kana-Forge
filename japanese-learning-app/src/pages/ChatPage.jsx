@@ -2,17 +2,25 @@ import { useState, useRef, useEffect } from 'react';
 
 const TUTOR_SYSTEM_PROMPT = `You are Hana, a warm, patient, and encouraging Japanese language tutor. Your job is to help the user practice Japanese conversation.
 
-Rules:
-- Always respond in Japanese appropriate to the user's selected level (N5 = very simple, N1 = advanced)
-- After your Japanese response, add a section called 「先生のメモ」(Teacher's Note) in English where you:
+CRITICAL RULES for Language Mode:
+- If Mode is "Full Japanese", YOU MUST respond using literal real Japanese characters (Hiragana, Katakana, and Kanji). DO NOT use ANY Romaji (English alphabet letters) for your conversational response. You can add furigana hints in parentheses for uncommon words.
+- If Mode is "Mixed", use a mix of real Japanese characters and English explanations.
+- If Mode is "Romaji Support", use real Japanese characters but MUST also provide Romaji reading for them.
+
+CRITICAL RULES for JLPT Level:
+- If Level is "N5", treat the user as a complete beginner. Use ONLY easy words, simple present/past tense (masu/desu form), and short sentences. DO NOT use complex grammar.
+- If Level is "N1", treat the user like a native speaker. Use advanced vocabulary, natural idioms, complex sentence structures, and high-level kanji naturally.
+- For N4, N3, N2, scale the difficulty appropriately between beginner and advanced.
+
+General Rules:
+- Always use actual Japanese text (like こんにちは) instead of rewriting it in English letters ("Konnichiwa").
+- After your conversational response, ALWAYS add a section called 「先生のメモ」(Teacher's Note) in English where you:
   1. Correct any grammar or vocabulary mistakes the user made
   2. Explain WHY it was wrong in simple terms
-  3. Show the correct version
-- Keep conversations natural and friendly
-- If the user writes in English, gently encourage them to try in Japanese and offer a template
-- Never make the user feel bad for making mistakes — always be encouraging
-- Use the topic the user selected to guide the conversation
-- Match the mode: if "Full Japanese", respond entirely in Japanese with furigana hints in parentheses. If "Mixed", use both Japanese and English. If "Romaji Support", add romaji after Japanese text.`;
+  3. Show the correct version using REAL Japanese characters.
+- Keep conversations natural and friendly.
+- Use the selected topic to guide the conversation.
+- Never make the user feel bad for making mistakes — always be encouraging.`;
 
 const topics = [
     { id: 'daily', label: 'Daily Life' },
@@ -42,11 +50,18 @@ export default function ChatPage() {
         try { return localStorage.getItem('kana-forge-groq-key') || ''; } catch { return ''; }
     });
     const [showApiKeyInput, setShowApiKeyInput] = useState(false);
-    const messagesEndRef = useRef(null);
+    const chatContainerRef = useRef(null);
 
+    // Scroll to bottom of chat container only, not the whole page
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        if (chatContainerRef.current) {
+            const container = chatContainerRef.current;
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [messages, isLoading]);
 
     const saveApiKey = (key) => {
         setApiKey(key);
@@ -54,9 +69,24 @@ export default function ChatPage() {
     };
 
     const startChat = () => {
+        let greeting = "";
+        const topicLabel = topics.find(t => t.id === selectedTopic)?.label || 'Japanese';
+
+        if (selectedMode === 'full-jp') {
+            if (selectedLevel === 'N5' || selectedLevel === 'N4') {
+                greeting = `こんにちは！ はな先生（せんせい）です。 今日（きょう）は「${topicLabel}」について話（はな）しましょう！`;
+            } else {
+                greeting = `こんにちは！はな先生です。今日は「${topicLabel}」について話しましょう！何か話したいことはありますか？`;
+            }
+        } else if (selectedMode === 'mixed') {
+            greeting = `こんにちは (Hello)! I am Hana Sensei. Let's practice talking about ${topicLabel} today!`;
+        } else {
+            greeting = `こんにちは！ はな先生です。 (Konnichiwa! Hana sensei desu.) Let's talk about ${topicLabel}!`;
+        }
+
         const introMessage = {
             role: 'assistant',
-            content: `Konnichiwa! I am Hana, your sensei. Let's practice writing ${topics.find(t => t.id === selectedTopic)?.label || 'Japanese'} today. Which character would you like to start with?`,
+            content: greeting,
         };
         setMessages([introMessage]);
         setChatStarted(true);
@@ -211,7 +241,10 @@ export default function ChatPage() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-6">
+            <div
+                ref={chatContainerRef}
+                className="flex-1 overflow-y-auto px-4 py-6"
+            >
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-8">
                         <span className="text-xs text-neutral-warm/20 uppercase tracking-widest">Today&apos;s Lesson</span>
@@ -254,7 +287,6 @@ export default function ChatPage() {
                                 </div>
                             </div>
                         )}
-                        <div ref={messagesEndRef} />
                     </div>
                 </div>
             </div>
