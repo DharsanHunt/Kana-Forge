@@ -1,4 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 import {
     getAuth,
     signInWithEmailAndPassword,
@@ -12,12 +13,13 @@ import {
 } from 'firebase/auth';
 
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyD0cF7P_hqny9bleLekC7SAHNNgeCDnJu0',
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'kana-forge.firebaseapp.com',
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'kana-forge',
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'kana-forge.appspot.com',
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '123456789012',
-    appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:123456789012:web:abcdef123456',
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyD0cF7P_hqny9bleLekC7SAHNNgeCDnJu0",
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "kanaforge.firebaseapp.com",
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "kanaforge",
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "kanaforge.firebasestorage.app",
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1047969114782",
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1047969114782:web:196ad34ab875cc9f8b698f",
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-84Q3WMBM1G"
 };
 
 // Initialize Firebase safely
@@ -25,9 +27,22 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
+// Initialize Analytics safely
+let analytics = null;
+if (typeof window !== 'undefined') {
+    isSupported().then(supported => {
+        if (supported) {
+            analytics = getAnalytics(app);
+        }
+    }).catch(() => {
+        // Analytics unsupported in current runtime
+    });
+}
+
 export {
     app,
     auth,
+    analytics,
     googleProvider,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
@@ -37,3 +52,5 @@ export {
     updateProfile,
     onAuthStateChanged
 };
+
+export default app;
