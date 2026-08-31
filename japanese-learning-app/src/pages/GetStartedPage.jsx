@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useProgress } from '../context/ProgressContext';
 
 const levels = [
     { id: 'N5', label: 'N5', sublabel: 'Beginner', color: '#2ecc71', icon: '🌱' },
@@ -11,12 +12,14 @@ const levels = [
 
 export default function GetStartedPage() {
     const navigate = useNavigate();
+    const { setLevel } = useProgress();
     const [selectedLevel, setSelectedLevel] = useState(null);
     const [step, setStep] = useState(1);
 
     const handleContinue = () => {
         if (step === 1 && selectedLevel) {
             localStorage.setItem('kana-forge-level', selectedLevel);
+            if (setLevel) setLevel(selectedLevel);
             setStep(2);
         } else if (step === 2) {
             navigate('/lessons');

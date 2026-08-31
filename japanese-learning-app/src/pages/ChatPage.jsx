@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { api } from '../services/api';
 
 const TUTOR_SYSTEM_PROMPT = `You are Hana, a warm, patient, and encouraging Japanese language tutor. Your job is to help the user practice Japanese conversation.
 
@@ -95,12 +96,6 @@ export default function ChatPage() {
     const sendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
-        const effectiveApiKey = apiKey || import.meta.env.VITE_GROQ_API_KEY || '';
-        if (!effectiveApiKey) {
-            setShowApiKeyInput(true);
-            return;
-        }
-
         const userMessage = { role: 'user', content: input.trim() };
         setMessages((prev) => [...prev, userMessage]);
         setInput('');
@@ -115,30 +110,48 @@ export default function ChatPage() {
             .map((m) => ({ role: m.role, content: m.content }));
 
         try {
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${effectiveApiKey}`,
-                },
-                body: JSON.stringify({
-                    model: 'llama-3.3-70b-versatile',
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        ...conversationHistory,
-                    ],
-                    max_tokens: 1000,
-                    temperature: 0.7,
-                }),
-            });
+            // First attempt: Secure Express backend AI proxy
+            let assistantMessage = '';
+            try {
+                const res = await api.sendAIChatMessage({
+                    messages: conversationHistory,
+                    systemPrompt,
+                });
+                if (res?.message) {
+                    assistantMessage = res.message;
+                }
+            } catch (backendErr) {
+                console.warn('Backend AI proxy unavailable, attempting client fallback:', backendErr.message);
+                const effectiveApiKey = apiKey || import.meta.env.VITE_GROQ_API_KEY || '';
+                if (!effectiveApiKey) {
+                    throw new Error(backendErr.message || 'AI service unavailable. Configure server or provide an API key.');
+                }
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${effectiveApiKey}`,
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.3-70b-versatile',
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            ...conversationHistory,
+                        ],
+                        max_tokens: 1000,
+                        temperature: 0.7,
+                    }),
+                });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                throw new Error(errorData?.error?.message || `API error: ${response.status}`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(errorData?.error?.message || `API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                assistantMessage = data.choices?.[0]?.message?.content || 'No response received.';
             }
 
-            const data = await response.json();
-            const assistantMessage = data.choices?.[0]?.message?.content || 'No response received.';
             setMessages((prev) => [...prev, { role: 'assistant', content: assistantMessage }]);
         } catch (error) {
             setMessages((prev) => [...prev, { role: 'assistant', content: `⚠️ Connection error: ${error.message}` }]);
