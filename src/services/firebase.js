@@ -12,7 +12,7 @@ import {
 } from 'firebase/auth';
 
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDummyKeyForDevelopment123456789',
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyD0cF7P_hqny9bleLekC7SAHNNgeCDnJu0',
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'kana-forge.firebaseapp.com',
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'kana-forge',
     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'kana-forge.appspot.com',
