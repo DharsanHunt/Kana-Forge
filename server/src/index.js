@@ -16,12 +16,19 @@ import { errorHandler } from './middleware/errorHandler.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const allowedOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : ['http://localhost:5173', 'http://localhost:3000', 'https://kana-forge.vercel.app'];
 
 // Middlewares
 app.use(cors({
-    origin: CORS_ORIGIN,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*') || origin.endsWith('.vercel.app')) {
+            callback(null, true);
+        } else {
+            callback(null, true);
+        }
+    },
     credentials: true,
 }));
 app.use(express.json({ limit: '15mb' })); // Support base64 canvas image data
