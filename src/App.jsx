@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import { ProgressProvider } from './context/ProgressContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -17,29 +18,31 @@ import GetStartedPage from './pages/GetStartedPage';
 
 export default function App() {
   return (
-    <ProgressProvider>
-      <Router>
-        <ScrollToTop />
-        <div className="min-h-screen flex flex-col">
-          <Navbar />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/lessons" element={<LessonsPage />} />
-              <Route path="/lessons/:id" element={<LessonDetailPage />} />
-              <Route path="/writing" element={<WritingPage />} />
-              <Route path="/quiz" element={<QuizPage />} />
-              <Route path="/vocabulary" element={<VocabularyPage />} />
-              <Route path="/grammar" element={<GrammarPage />} />
-              <Route path="/chat" element={<ChatPage />} />
-              <Route path="/progress" element={<ProgressPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/get-started" element={<GetStartedPage />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </ProgressProvider>
+    <AuthProvider>
+      <ProgressProvider>
+        <Router>
+          <ScrollToTop />
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/lessons" element={<LessonsPage />} />
+                <Route path="/lessons/:id" element={<LessonDetailPage />} />
+                <Route path="/writing" element={<WritingPage />} />
+                <Route path="/quiz" element={<QuizPage />} />
+                <Route path="/vocabulary" element={<VocabularyPage />} />
+                <Route path="/grammar" element={<GrammarPage />} />
+                <Route path="/chat" element={<ChatPage />} />
+                <Route path="/progress" element={<ProgressPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/get-started" element={<GetStartedPage />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </Router>
+      </ProgressProvider>
+    </AuthProvider>
   );
 }
