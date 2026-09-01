@@ -124,7 +124,7 @@ export default function ChatPage() {
                 console.warn('Backend AI proxy unavailable, attempting client fallback:', backendErr.message);
                 const effectiveApiKey = apiKey || import.meta.env.VITE_GROQ_API_KEY || '';
                 if (!effectiveApiKey) {
-                    throw new Error(backendErr.message || 'AI service unavailable. Configure server or provide an API key.');
+                    throw new Error(backendErr.message || 'AI service unavailable. Please configure server or enter an API key in settings.');
                 }
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
