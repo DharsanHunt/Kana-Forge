@@ -126,30 +126,52 @@ export default function ChatPage() {
                 if (!effectiveApiKey) {
                     throw new Error(backendErr.message || 'AI service unavailable. Please configure server or enter an API key in settings.');
                 }
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${effectiveApiKey}`,
-                    },
-                    body: JSON.stringify({
-                        model: 'llama-3.3-70b-versatile',
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            ...conversationHistory,
-                        ],
-                        max_tokens: 1000,
-                        temperature: 0.7,
-                    }),
-                });
+                const candidateModels = [
+                    'openai/gpt-oss-120b',
+                    'qwen/qwen3.8-27b',
+                    'openai/gpt-oss-20b',
+                    'llama-3.3-70b-versatile',
+                    'llama-3.1-70b-versatile',
+                    'llama3-70b-8192'
+                ];
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => null);
-                    throw new Error(errorData?.error?.message || `API error: ${response.status}`);
+                let lastError = null;
+                for (const model of candidateModels) {
+                    try {
+                        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${effectiveApiKey}`,
+                            },
+                            body: JSON.stringify({
+                                model,
+                                messages: [
+                                    { role: 'system', content: systemPrompt },
+                                    ...conversationHistory,
+                                ],
+                                max_tokens: 1000,
+                                temperature: 0.7,
+                            }),
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            assistantMessage = data.choices?.[0]?.message?.content || 'No response received.';
+                            lastError = null;
+                            break;
+                        } else {
+                            const errorData = await response.json().catch(() => null);
+                            lastError = new Error(errorData?.error?.message || `API error: ${response.status}`);
+                        }
+                    } catch (err) {
+                        lastError = err;
+                    }
                 }
 
-                const data = await response.json();
-                assistantMessage = data.choices?.[0]?.message?.content || 'No response received.';
+                if (!assistantMessage && lastError) {
+                    throw lastError;
+                }
             }
 
             setMessages((prev) => [...prev, { role: 'assistant', content: assistantMessage }]);

@@ -22,33 +22,56 @@ router.post('/chat', async (req, res, next) => {
         }
 
         const conversation = messages.map(m => ({ role: m.role, content: m.content }));
+        const candidateModels = [
+            'openai/gpt-oss-120b',
+            'qwen/qwen3.8-27b',
+            'openai/gpt-oss-20b',
+            'llama-3.3-70b-versatile',
+            'llama-3.1-70b-versatile',
+            'llama3-70b-8192'
+        ];
 
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
-                messages: [
-                    { role: 'system', content: systemPrompt || 'You are Hana, an encouraging Japanese tutor.' },
-                    ...conversation,
-                ],
-                max_tokens: 1000,
-                temperature: 0.7,
-            }),
-        });
+        let content = null;
+        let lastError = null;
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.error?.message || `AI API error status: ${response.status}`);
+        for (const model of candidateModels) {
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        model,
+                        messages: [
+                            { role: 'system', content: systemPrompt || 'You are Hana, an encouraging Japanese tutor.' },
+                            ...conversation,
+                        ],
+                        max_tokens: 1000,
+                        temperature: 0.7,
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    content = data.choices?.[0]?.message?.content || 'No response generated.';
+                    lastError = null;
+                    break;
+                } else {
+                    const errorData = await response.json().catch(() => null);
+                    lastError = new Error(errorData?.error?.message || `AI API error status: ${response.status}`);
+                }
+            } catch (err) {
+                lastError = err;
+            }
         }
 
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content || 'No response generated.';
+        if (!content && lastError) {
+            throw lastError;
+        }
 
-        res.json({ message: content });
+        res.json({ message: content || 'No response generated.' });
     } catch (error) {
         console.error('AI Chat Error:', error.message);
         res.status(500).json({ error: `AI Tutor error: ${error.message}` });
