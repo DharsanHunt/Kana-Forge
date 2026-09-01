@@ -97,6 +97,57 @@ export function AuthProvider({ children }) {
         await sendPasswordResetEmail(auth, email);
     };
 
+    const updateUsername = async (newName) => {
+        if (!newName || !newName.trim()) {
+            throw new Error('Username cannot be empty');
+        }
+        const trimmed = newName.trim();
+        
+        // 1. Update Firebase display name if available
+        if (auth.currentUser) {
+            await updateProfile(auth.currentUser, { displayName: trimmed });
+        }
+
+        // 2. Synchronize PostgreSQL database
+        try {
+            await api.updateProfile({ name: trimmed });
+        } catch (backendErr) {
+            console.warn('Backend profile update notice:', backendErr.message);
+        }
+
+        // 3. Update local user state immediately
+        setUser((prev) => prev ? { ...prev, displayName: trimmed } : null);
+    };
+
+    const deleteAccount = async () => {
+        // 1. Delete application & progress data from backend
+        try {
+            await api.deleteAccount();
+        } catch (backendErr) {
+            console.warn('Backend account deletion notice:', backendErr.message);
+        }
+
+        // 2. Delete Firebase authentication user
+        if (auth.currentUser) {
+            try {
+                await auth.currentUser.delete();
+            } catch (fbErr) {
+                // If reauthentication is required
+                if (fbErr.code === 'auth/requires-recent-login') {
+                    throw new Error('Please sign in again to confirm account deletion.');
+                }
+                throw fbErr;
+            }
+        }
+
+        // 3. Clear local state
+        setUser(null);
+        setFirebaseUser(null);
+        try {
+            localStorage.removeItem('kana-forge-progress');
+        } catch {}
+    };
+
     const signOut = async () => {
         await firebaseSignOut(auth);
         setUser(null);
@@ -116,6 +167,8 @@ export function AuthProvider({ children }) {
         signUpWithEmail,
         signInWithGoogle,
         resetPassword,
+        updateUsername,
+        deleteAccount,
         signOut,
         getIdToken,
         isAuthenticated: !!user,

@@ -79,6 +79,13 @@ export default function Navbar() {
                                         <div className="text-[11px] text-neutral-warm/40 truncate">{user?.email}</div>
                                     </div>
                                     <Link
+                                        to="/profile"
+                                        onClick={() => setUserMenuOpen(false)}
+                                        className="block px-4 py-2 text-xs text-neutral-warm/70 hover:text-primary hover:bg-neutral-warm/5"
+                                    >
+                                        👤 Profile & Account
+                                    </Link>
+                                    <Link
                                         to="/progress"
                                         onClick={() => setUserMenuOpen(false)}
                                         className="block px-4 py-2 text-xs text-neutral-warm/70 hover:text-primary hover:bg-neutral-warm/5"
@@ -147,11 +154,25 @@ export default function Navbar() {
                             {isAuthenticated ? (
                                 <div className="space-y-2">
                                     <div className="px-4 py-2 text-xs text-neutral-warm/40">
-                                        Signed in as <strong className="text-neutral-warm">{user?.email}</strong>
+                                        Signed in as <strong className="text-neutral-warm">{user?.displayName || user?.email}</strong>
                                     </div>
+                                    <Link
+                                        to="/profile"
+                                        onClick={() => setMobileOpen(false)}
+                                        className="block px-4 py-2.5 text-xs text-neutral-warm/80 hover:text-primary bg-bg-elevated/40 rounded-xl"
+                                    >
+                                        👤 Profile & Account
+                                    </Link>
+                                    <Link
+                                        to="/progress"
+                                        onClick={() => setMobileOpen(false)}
+                                        className="block px-4 py-2.5 text-xs text-neutral-warm/80 hover:text-primary bg-bg-elevated/40 rounded-xl"
+                                    >
+                                        📊 Progress Dashboard
+                                    </Link>
                                     <button
                                         onClick={handleSignOut}
-                                        className="w-full block px-4 py-3 text-sm font-bold text-error bg-error/10 rounded text-center"
+                                        className="w-full block px-4 py-3 text-sm font-bold text-error bg-error/10 rounded-xl text-center"
                                     >
                                         Log Out
                                     </button>

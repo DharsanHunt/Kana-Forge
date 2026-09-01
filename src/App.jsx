@@ -13,6 +13,7 @@ import VocabularyPage from './pages/VocabularyPage';
 import GrammarPage from './pages/GrammarPage';
 import ChatPage from './pages/ChatPage';
 import ProgressPage from './pages/ProgressPage';
+import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import GetStartedPage from './pages/GetStartedPage';
 
@@ -35,6 +36,7 @@ export default function App() {
                 <Route path="/grammar" element={<GrammarPage />} />
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/progress" element={<ProgressPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/get-started" element={<GetStartedPage />} />
               </Routes>

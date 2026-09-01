@@ -1,27 +1,29 @@
-import { useProgress } from '../context/ProgressContext';
-import { lessons } from '../data/lessons';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useProgress } from '../context/ProgressContext';
+import { calculateOverallStats } from '../services/progressCalculator';
 
 export default function ProgressPage() {
-    const { progress } = useProgress();
+    const { progress, removeWord } = useProgress();
 
-    const totalLessons = lessons.length;
-    const completedCount = progress.completedLessons.length;
-    const quizzesTaken = progress.quizScores.length;
-    const averageScore = quizzesTaken > 0
-        ? Math.round(progress.quizScores.reduce((sum, q) => sum + (q.score / q.total) * 100, 0) / quizzesTaken)
-        : 0;
+    // Deterministically compute all progress metrics from actual application state
+    const stats = useMemo(() => {
+        return calculateOverallStats(progress);
+    }, [progress]);
 
-    const levelProgress = ['N5', 'N4', 'N3', 'N2'].map((level) => {
-        const levelLessons = lessons.filter((l) => l.level === level);
-        const completed = levelLessons.filter((l) => progress.completedLessons.includes(l.id)).length;
-        const percent = levelLessons.length > 0 ? Math.round((completed / levelLessons.length) * 100) : 0;
-        return { level, total: levelLessons.length, completed, percent };
-    });
+    const levelColors = {
+        N5: '#2ecc71',
+        N4: '#3498db',
+        N3: '#f1c40f',
+        N2: '#e63746'
+    };
 
-    const levelColors = { N5: '#2ecc71', N4: '#3498db', N3: '#f1c40f', N2: '#e63746' };
-    const levelNames = { N5: 'Beginner', N4: 'Elementary', N3: 'Intermediate', N2: 'Pre-Advanced' };
-    const topWeakSpots = [...(progress.weakSpots || [])].sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0)).slice(0, 3);
+    const levelNames = {
+        N5: 'Beginner Curriculum',
+        N4: 'Elementary Curriculum',
+        N3: 'Intermediate (Upcoming)',
+        N2: 'Pre-Advanced (Upcoming)'
+    };
 
     return (
         <div className="fade-in min-h-screen">
@@ -31,155 +33,263 @@ export default function ProgressPage() {
                     <div className="absolute -top-6 left-0 opacity-[0.04] pointer-events-none select-none">
                         <span className="text-[20vh] font-serif">修</span>
                     </div>
-                    <span className="text-primary text-xs font-bold tracking-widest uppercase block mb-2">Your Journey</span>
-                    <h1 className="text-5xl md:text-7xl font-serif font-bold text-neutral-warm">
-                        Progress <span className="text-neutral-warm/20">Dashboard</span>
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        <span className="text-primary text-xs font-bold tracking-widest uppercase">Learner Metrics</span>
+                    </div>
+                    <h1 className="text-4xl md:text-6xl font-serif font-bold text-neutral-warm">
+                        Progress <span className="text-neutral-warm/30">Dashboard</span>
                     </h1>
+                    <p className="text-neutral-warm/50 text-sm md:text-base font-light mt-2 max-w-2xl">
+                        Real-time deterministic breakdown of your lesson milestones, kanji mastery, vocabulary lexicon, and review areas.
+                    </p>
                 </div>
 
-                {/* Stats Cards */}
+                {/* Top Stats Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                    <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
-                        <div className="text-xs text-neutral-warm/30 uppercase tracking-wider mb-3">Total Kanji</div>
-                        <div className="text-4xl font-bold text-neutral-warm">{completedCount}</div>
-                        <div className="text-xs text-success flex items-center gap-1 mt-2">
-                            <span>↗</span> +{Math.min(completedCount, 12)} this week
-                        </div>
-                    </div>
-                    <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
-                        <div className="text-xs text-neutral-warm/30 uppercase tracking-wider mb-3">Study Streak</div>
+                    {/* 1. Total Learned Kanji */}
+                    <div className="bg-bg-card border border-neutral-warm/10 rounded-2xl p-6 shadow-sm hover:border-neutral-warm/20 transition-all">
+                        <div className="text-xs text-neutral-warm/40 font-bold uppercase tracking-wider mb-2">Learned Kanji</div>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-bold text-[#f1c40f]">{progress.streak.count}</span>
-                            <span className="text-sm text-neutral-warm/30">Days</span>
+                            <span className="text-4xl font-bold font-serif text-neutral-warm">{stats.totalKanjiLearned}</span>
+                            <span className="text-xs text-neutral-warm/40 font-mono">/ {stats.totalKanjiCurriculum}</span>
                         </div>
-                        <div className="text-xs text-[#f1c40f]/60 flex items-center gap-1 mt-2">
-                            <span>🏆</span> Personal Best
+                        <div className="text-[11px] text-neutral-warm/50 mt-2 flex items-center gap-1">
+                            <span>✍</span>
+                            <span>{stats.totalKanjiLearned > 0 ? `${stats.totalKanjiLearned} characters practiced` : 'No kanji practiced yet'}</span>
                         </div>
                     </div>
-                    <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
-                        <div className="text-xs text-neutral-warm/30 uppercase tracking-wider mb-3">Mastery Rate</div>
+
+                    {/* 2. Study Streak */}
+                    <div className="bg-bg-card border border-neutral-warm/10 rounded-2xl p-6 shadow-sm hover:border-neutral-warm/20 transition-all">
+                        <div className="text-xs text-neutral-warm/40 font-bold uppercase tracking-wider mb-2">Study Streak</div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-bold font-serif text-[#f1c40f]">{stats.streakCount}</span>
+                            <span className="text-sm font-medium text-neutral-warm/40">Days</span>
+                        </div>
+                        <div className="text-[11px] text-[#f1c40f]/70 mt-2 flex items-center gap-1">
+                            <span>🔥</span>
+                            <span>{stats.streakCount > 0 ? 'Daily forge consistency' : 'Start your streak today'}</span>
+                        </div>
+                    </div>
+
+                    {/* 3. Mastery Rate */}
+                    <div className="bg-bg-card border border-neutral-warm/10 rounded-2xl p-6 shadow-sm hover:border-neutral-warm/20 transition-all">
+                        <div className="text-xs text-neutral-warm/40 font-bold uppercase tracking-wider mb-2">Mastery Rate</div>
                         <div className="flex items-baseline gap-1">
-                            <span className="text-4xl font-bold text-neutral-warm">{averageScore || 88.4}</span>
-                            <span className="text-sm text-neutral-warm/30">%</span>
+                            <span className="text-4xl font-bold font-serif text-neutral-warm">{stats.masteryRate}</span>
+                            <span className="text-sm font-medium text-neutral-warm/40">%</span>
                         </div>
-                        <div className="text-xs text-error/60 flex items-center gap-1 mt-2">
-                            <span>↓</span> -0.2% variance
+                        <div className="text-[11px] text-neutral-warm/50 mt-2 flex items-center gap-1">
+                            <span>🎯</span>
+                            <span>{stats.quizzesTaken > 0 ? `Across ${stats.quizzesTaken} quiz session${stats.quizzesTaken > 1 ? 's' : ''}` : 'Take quizzes to measure'}</span>
                         </div>
                     </div>
-                    <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
-                        <div className="text-xs text-neutral-warm/30 uppercase tracking-wider mb-3">Vocabulary</div>
-                        <div className="text-4xl font-bold text-neutral-warm">{progress.savedWords.length || '1,840'}</div>
-                        <div className="text-xs text-success flex items-center gap-1 mt-2">
-                            <span>↗</span> +{Math.min(progress.savedWords.length, 140)} items
+
+                    {/* 4. Vocabulary Saved */}
+                    <div className="bg-bg-card border border-neutral-warm/10 rounded-2xl p-6 shadow-sm hover:border-neutral-warm/20 transition-all">
+                        <div className="text-xs text-neutral-warm/40 font-bold uppercase tracking-wider mb-2">Saved Lexicon</div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-bold font-serif text-neutral-warm">{stats.savedVocabCount}</span>
+                            <span className="text-xs text-neutral-warm/40 font-mono">words</span>
+                        </div>
+                        <div className="text-[11px] text-success mt-2 flex items-center gap-1">
+                            <span>★</span>
+                            <Link to="/vocabulary" className="hover:underline">
+                                {stats.savedVocabCount > 0 ? 'Review bookmarked items' : 'Bookmark words in library'}
+                            </Link>
                         </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    {/* Left: JLPT + Chart */}
+                    {/* Left Column: JLPT Level Progress Bars */}
                     <div className="lg:col-span-3 space-y-8">
                         {/* JLPT Mastery Levels */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-6 border-t-2 border-primary"></div>
-                                <h2 className="text-xl font-bold text-neutral-warm">JLPT Mastery Levels</h2>
+                        <div className="bg-bg-card border border-neutral-warm/10 rounded-2xl p-6 shadow-sm">
+                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-neutral-warm/10">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-1.5 h-5 rounded-full bg-primary"></div>
+                                    <h2 className="text-lg font-bold text-neutral-warm">Curriculum Progress by JLPT Level</h2>
+                                </div>
+                                <span className="text-xs font-mono text-neutral-warm/40">Real-time Completion</span>
                             </div>
-                            <div className="space-y-5">
-                                {levelProgress.map((lp) => (
-                                    <div key={lp.level}>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-sm font-bold" style={{ color: levelColors[lp.level] }}>{lp.level}</span>
-                                                <span className="text-sm text-neutral-warm/40">{levelNames[lp.level]}</span>
-                                            </div>
-                                            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: levelColors[lp.level] }}>
-                                                {lp.percent}% Complete
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-neutral-warm/5 rounded-full h-1.5">
-                                            <div className="h-1.5 rounded-full transition-all duration-700" style={{ width: `${lp.percent}%`, backgroundColor: levelColors[lp.level] }}></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
 
-                        {/* Retention Forecast */}
-                        <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6">
-                            <h3 className="text-xs font-bold text-neutral-warm/30 uppercase tracking-widest mb-6">Retention Forecast</h3>
-                            <div className="flex items-end justify-between h-40 gap-3 px-2">
-                                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
-                                    const heights = [30, 55, 45, 70, 85, 60, 40];
+                            <div className="space-y-6">
+                                {stats.levels.map((lp) => {
+                                    const color = levelColors[lp.level] || '#2ecc71';
                                     return (
-                                        <div key={day} className="flex flex-col items-center gap-2 flex-1">
-                                            <div className="w-full flex flex-col justify-end h-32">
+                                        <div key={lp.level} className="space-y-2">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-bold px-2 py-0.5 rounded text-xs" style={{ backgroundColor: `${color}15`, color, border: `1px solid ${color}30` }}>
+                                                        JLPT {lp.level}
+                                                    </span>
+                                                    <span className="text-neutral-warm/70 font-medium text-xs">{levelNames[lp.level]}</span>
+                                                </div>
+                                                <div className="flex items-center gap-3 font-mono text-xs">
+                                                    <span className="text-neutral-warm/40">
+                                                        {lp.total > 0 ? `${lp.completed} / ${lp.total} lessons` : 'Coming soon'}
+                                                    </span>
+                                                    <span className="font-bold" style={{ color }}>
+                                                        {lp.percentage}% COMPLETE
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Animated Progress Bar */}
+                                            <div className="w-full bg-bg-elevated rounded-full h-2 overflow-hidden border border-neutral-warm/5">
                                                 <div
-                                                    className="w-full bg-primary/60 rounded-t transition-all hover:bg-primary"
-                                                    style={{ height: `${heights[i]}%` }}
+                                                    className="h-full rounded-full transition-all duration-700 ease-out"
+                                                    style={{
+                                                        width: `${lp.percentage}%`,
+                                                        backgroundColor: color,
+                                                        boxShadow: lp.percentage > 0 ? `0 0 10px ${color}40` : 'none'
+                                                    }}
                                                 ></div>
                                             </div>
-                                            <span className="text-[10px] text-neutral-warm/25 uppercase">{day}</span>
                                         </div>
                                     );
                                 })}
                             </div>
+
+                            <div className="mt-8 pt-6 border-t border-neutral-warm/10 flex items-center justify-between text-xs text-neutral-warm/40">
+                                <span>Progress updates automatically when lessons are marked complete.</span>
+                                <Link to="/lessons" className="text-primary font-bold hover:underline">
+                                    Go to Lessons →
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/* Recent Study Activity Timeline */}
+                        <div className="bg-bg-card border border-neutral-warm/10 rounded-2xl p-6 shadow-sm">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-1.5 h-5 rounded-full bg-[#f1c40f]"></div>
+                                    <h3 className="text-base font-bold text-neutral-warm">Recent Quiz History</h3>
+                                </div>
+                                <span className="text-xs font-mono text-neutral-warm/40">{stats.quizzesTaken} attempts</span>
+                            </div>
+
+                            {progress.quizScores && progress.quizScores.length > 0 ? (
+                                <div className="space-y-3">
+                                    {progress.quizScores.slice(-5).reverse().map((attempt, index) => {
+                                        const percentage = Math.round((attempt.score / attempt.total) * 100);
+                                        const isPassing = percentage >= 70;
+                                        return (
+                                            <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-bg-elevated/60 border border-neutral-warm/5 text-xs">
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`w-2 h-2 rounded-full ${isPassing ? 'bg-success' : 'bg-primary'}`}></span>
+                                                    <div>
+                                                        <span className="font-bold text-neutral-warm">{attempt.category || 'General Quiz'}</span>
+                                                        <div className="text-[10px] text-neutral-warm/40 font-mono">{attempt.date || 'Recent'}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3 font-mono">
+                                                    <span className="text-neutral-warm/60">{attempt.score} / {attempt.total}</span>
+                                                    <span className={`font-bold px-2 py-0.5 rounded text-[11px] ${isPassing ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'}`}>
+                                                        {percentage}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-neutral-warm/40 text-xs">
+                                    <p className="mb-2">No quiz attempts recorded yet.</p>
+                                    <Link to="/quiz" className="text-primary font-bold hover:underline">Start a Quiz →</Link>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Right: Weak Spots + Saved Words */}
+                    {/* Right Column: Weak Spots + Saved Words */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* Weak Spots */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-6 border-t-2 border-primary"></div>
-                                <h2 className="text-xl font-bold text-neutral-warm">Weak Spots</h2>
+                        <div className="bg-bg-card border border-neutral-warm/10 rounded-2xl p-6 shadow-sm">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-1.5 h-5 rounded-full bg-error"></div>
+                                <h2 className="text-base font-bold text-neutral-warm">Weak Spots / Review Deck</h2>
                             </div>
-                            {topWeakSpots.length === 0 ? (
-                                <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6 text-center">
-                                    <p className="text-neutral-warm/30 text-sm mb-3">Take quizzes to identify weak areas.</p>
-                                    <Link to="/quiz" className="text-primary text-sm hover:text-primary-light">Take a quiz →</Link>
+                            <p className="text-xs text-neutral-warm/50 mb-4">
+                                Concepts and questions frequently answered incorrectly during quizzes.
+                            </p>
+
+                            {stats.weakSpots.length === 0 ? (
+                                <div className="p-6 rounded-xl bg-bg-elevated/40 border border-neutral-warm/5 text-center">
+                                    <div className="text-2xl mb-2 font-serif text-neutral-warm/20">清</div>
+                                    <p className="text-neutral-warm/40 text-xs mb-3">No weak spots detected. Great accuracy!</p>
+                                    <Link to="/quiz" className="text-primary text-xs font-bold hover:underline">
+                                        Take a Quiz →
+                                    </Link>
                                 </div>
                             ) : (
-                                <div className="space-y-2">
-                                    {topWeakSpots.map((item, i) => (
-                                        <div key={i} className="bg-bg-card border border-neutral-warm/5 rounded-lg p-4 flex items-center gap-4 hover:border-neutral-warm/10 transition-colors cursor-pointer group">
-                                            <div className="text-2xl font-serif text-primary/50">{item.correctAnswer?.charAt(0) || '義'}</div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="text-sm font-medium text-neutral-warm truncate">{item.correctAnswer || 'Gi'}</div>
-                                                <div className="text-xs text-neutral-warm/30 uppercase">{item.category || 'Review'}</div>
+                                <div className="space-y-2.5">
+                                    {stats.weakSpots.map((item, i) => (
+                                        <div
+                                            key={i}
+                                            className="p-3.5 rounded-xl bg-bg-elevated/60 border border-neutral-warm/5 flex items-start justify-between gap-3 text-xs"
+                                        >
+                                            <div className="min-w-0 flex-1">
+                                                <div className="font-medium text-neutral-warm line-clamp-2 mb-1">
+                                                    {item.question}
+                                                </div>
+                                                <div className="flex items-center gap-2 text-[10px] text-neutral-warm/40">
+                                                    <span className="text-primary font-jp font-bold">{item.correctAnswer}</span>
+                                                    <span>•</span>
+                                                    <span className="uppercase">{item.category || 'Quiz'}</span>
+                                                </div>
                                             </div>
-                                            <span className="text-neutral-warm/20 group-hover:text-neutral-warm/40 transition-colors">›</span>
+                                            <span className="px-2 py-0.5 rounded bg-error/10 text-error font-bold font-mono text-[10px] shrink-0">
+                                                {item.wrongCount} err{item.wrongCount > 1 ? 's' : ''}
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
 
-                        {/* Saved Words */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-6 border-t-2 border-primary"></div>
-                                <h2 className="text-xl font-bold text-neutral-warm">Saved Words</h2>
+                        {/* Saved Words Deck */}
+                        <div className="bg-bg-card border border-neutral-warm/10 rounded-2xl p-6 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-1.5 h-5 rounded-full bg-primary"></div>
+                                    <h2 className="text-base font-bold text-neutral-warm">Saved Vocabulary</h2>
+                                </div>
+                                <Link to="/vocabulary" className="text-primary text-xs font-bold hover:underline">
+                                    Browse ({stats.savedVocabCount})
+                                </Link>
                             </div>
-                            {progress.savedWords.length === 0 ? (
-                                <div className="bg-bg-card border border-neutral-warm/5 rounded-lg p-6 text-center">
-                                    <p className="text-neutral-warm/30 text-sm mb-3">Save words from the vocabulary page.</p>
-                                    <Link to="/vocabulary" className="text-primary text-sm hover:text-primary-light">Browse vocabulary →</Link>
+
+                            {progress.savedWords && progress.savedWords.length > 0 ? (
+                                <div className="space-y-2">
+                                    {progress.savedWords.slice(0, 4).map((w) => (
+                                        <div
+                                            key={w.id}
+                                            className="p-3 rounded-xl bg-bg-elevated/60 border border-neutral-warm/5 flex items-center justify-between gap-3 text-xs"
+                                        >
+                                            <div>
+                                                <span className="font-jp font-bold text-neutral-warm">{w.word}</span>
+                                                {w.reading && <span className="font-jp text-primary/80 ml-1.5">({w.reading})</span>}
+                                                <div className="text-[11px] text-neutral-warm/50 truncate max-w-[160px]">{w.meaning}</div>
+                                            </div>
+                                            <button
+                                                onClick={() => removeWord(w.id)}
+                                                className="text-neutral-warm/30 hover:text-error transition-colors p-1"
+                                                title="Remove bookmark"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             ) : (
-                                <div>
-                                    <div className="flex flex-wrap gap-2 mb-4">
-                                        {progress.savedWords.slice(0, 6).map((word) => (
-                                            <span key={word.id} className="bg-bg-card border border-neutral-warm/10 text-neutral-warm/60 px-3 py-1.5 rounded text-sm font-jp">
-                                                {word.word}
-                                            </span>
-                                        ))}
-                                    </div>
-                                    {progress.savedWords.length > 6 && (
-                                        <Link to="/vocabulary" className="block w-full border border-neutral-warm/10 text-neutral-warm/30 py-3 rounded text-sm text-center hover:border-neutral-warm/20 transition-colors uppercase tracking-wider text-xs">
-                                            View All {progress.savedWords.length} Items
-                                        </Link>
-                                    )}
+                                <div className="p-6 rounded-xl bg-bg-elevated/40 border border-neutral-warm/5 text-center text-xs text-neutral-warm/40">
+                                    <p className="mb-2">No words bookmarked yet.</p>
+                                    <Link to="/vocabulary" className="text-primary font-bold hover:underline">
+                                        Explore Vocabulary Library →
+                                    </Link>
                                 </div>
                             )}
                         </div>

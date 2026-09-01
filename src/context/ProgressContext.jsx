@@ -13,6 +13,7 @@ const defaultProgress = {
     reviewList: [],
     streak: { count: 0, lastStudyDate: null },
     weakSpots: [],
+    learnedKanji: [],
     selectedLevel: 'N5',
 };
 
@@ -58,17 +59,30 @@ export function ProgressProvider({ children }) {
                 try {
                     await api.migrateProgress(local);
                     hasMigrated.current = true;
-                    // Clear local storage after successful migration
                     localStorage.removeItem(STORAGE_KEY);
                 } catch (migrationErr) {
                     console.warn('LocalStorage migration notice:', migrationErr);
                 }
             }
 
-            const data = await api.getProgress();
-            if (data?.progress) {
-                setProgress(data.progress);
+            const [progressData, writingData] = await Promise.allSettled([
+                api.getProgress(),
+                api.getWritingProgress(),
+            ]);
+
+            let remoteProgress = { ...defaultProgress };
+            if (progressData.status === 'fulfilled' && progressData.value?.progress) {
+                remoteProgress = { ...remoteProgress, ...progressData.value.progress };
             }
+
+            if (writingData.status === 'fulfilled' && writingData.value?.writingProgress) {
+                const kanjiChars = writingData.value.writingProgress
+                    .filter(w => w.characterType === 'kanji')
+                    .map(w => w.character);
+                remoteProgress.learnedKanji = Array.from(new Set(kanjiChars));
+            }
+
+            setProgress(remoteProgress);
         } catch (error) {
             console.warn('Could not load remote progress from backend, using local state:', error.message);
         } finally {
@@ -80,10 +94,11 @@ export function ProgressProvider({ children }) {
         if (isAuthenticated) {
             fetchRemoteProgress();
         } else {
-            // Unauthenticated guest user
+            // Reset to guest local progress when unauthenticated
             setProgress(loadLocalProgress());
+            hasMigrated.current = false;
         }
-    }, [isAuthenticated, fetchRemoteProgress]);
+    }, [isAuthenticated, fetchRemoteProgress, user?.uid]);
 
     // Fallback sync to localStorage when unauthenticated
     useEffect(() => {
@@ -100,7 +115,7 @@ export function ProgressProvider({ children }) {
         // Optimistic update
         setProgress((prev) => {
             if (prev.completedLessons.includes(lessonId)) return prev;
-            let newStreak = prev.streak.count;
+            let newStreak = prev.streak.count || 0;
             const lastDate = prev.streak.lastStudyDate;
             if (lastDate === today) {
                 // already studied today
@@ -136,7 +151,7 @@ export function ProgressProvider({ children }) {
 
         // Optimistic update
         setProgress((prev) => {
-            let newStreak = prev.streak.count;
+            let newStreak = prev.streak.count || 0;
             const lastDate = prev.streak.lastStudyDate;
             if (lastDate === today) {
                 // already studied today
@@ -260,7 +275,28 @@ export function ProgressProvider({ children }) {
         }
     };
 
-    // 7. Update Level
+    // 7. Record Kanji Writing Practice
+    const recordKanjiPractice = async (character, score = 10) => {
+        setProgress((prev) => {
+            const set = new Set(prev.learnedKanji || []);
+            set.add(character);
+            return { ...prev, learnedKanji: Array.from(set) };
+        });
+
+        if (isAuthenticated) {
+            try {
+                await api.saveWritingProgress({
+                    character,
+                    characterType: 'kanji',
+                    score,
+                });
+            } catch (err) {
+                console.error('Failed to persist kanji practice:', err);
+            }
+        }
+    };
+
+    // 8. Update Level
     const setLevel = async (level) => {
         setProgress((prev) => ({ ...prev, selectedLevel: level }));
         if (isAuthenticated) {
@@ -281,6 +317,7 @@ export function ProgressProvider({ children }) {
         removeFromReviewList,
         saveWord,
         removeWord,
+        recordKanjiPractice,
         setLevel,
         refreshProgress: fetchRemoteProgress,
     };

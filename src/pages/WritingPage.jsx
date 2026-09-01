@@ -5,11 +5,13 @@ import { kanjiList } from '../data/kanji';
 import { kanjiSections } from '../data/kanjiSections';
 import DrawingCanvas from '../components/DrawingCanvas';
 import AudioPlayer from '../components/AudioPlayer';
+import { useProgress } from '../context/ProgressContext';
 import { api } from '../services/api';
 
 const tabs = ['Hiragana', 'Katakana', 'Kanji'];
 
 export default function WritingPage() {
+    const { recordKanjiPractice } = useProgress();
     const [activeTab, setActiveTab] = useState('Hiragana');
     const [selectedChar, setSelectedChar] = useState(null);
     const [selectedKanjiSection, setSelectedKanjiSection] = useState('All');
@@ -196,6 +198,9 @@ Rules:
 
             if (result) {
                 setAiResult(result);
+                if (activeTab === 'Kanji') {
+                    recordKanjiPractice(selectedChar.character, result.score || 0);
+                }
                 try {
                     await api.saveWritingProgress({
                         character: selectedChar.character,

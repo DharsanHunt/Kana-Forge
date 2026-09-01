@@ -41,6 +41,8 @@ export const api = {
     // Users
     syncUser: (data) => request('/users/sync', { method: 'POST', body: JSON.stringify(data) }),
     getUserProfile: () => request('/users/me'),
+    updateProfile: (data) => request('/users/profile', { method: 'PUT', body: JSON.stringify(data) }),
+    deleteAccount: () => request('/users/account', { method: 'DELETE' }),
 
     // Progress
     getProgress: () => request('/progress'),
